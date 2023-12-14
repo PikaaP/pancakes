@@ -3,9 +3,10 @@
 import { StaticImageData, StaticImport } from 'next/dist/shared/lib/get-img-props';
 import Image from 'next/image'
 import React, { SetStateAction } from "react";
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import axios from 'axios';
 
-var data =[
+var data = [
   {
     "name": "Trina",
     "index": 0,
@@ -299,7 +300,103 @@ var data =[
 
 export default function Home() {
 
+
   const [searchInput, setSearchInput] = useState(String)
+  let [serverData, setServerData] = useState<any>()
+
+  function collectData(route: string): void {
+
+
+  }
+
+  useEffect(
+    () => {
+      axios.get(`http://localhost:3001/all`)
+        .then((res) => {
+          var responseData = res.data
+          setServerData(responseData)
+        }).catch((err: Error) => {
+          console.log(err)
+        })
+
+    }, []
+  )
+
+  const Breakfast = () => {
+    if (serverData) {
+      return (
+        serverData[0]['breakfast'].map((item: any) => {
+          return (
+            <FoodCard key={item['recipe'].calories} foodItem={item['recipe']} />
+          )
+        })
+      )
+    }
+    else {
+      return (
+        <></>
+      )
+    }
+
+  }
+
+  const Lunch = () => {
+    if (serverData) {
+      return (
+        serverData[0]['lunch'].map((item: any) => {
+          return (
+            <FoodCard key={item['recipe'].calories} foodItem={item['recipe']} />
+          )
+        })
+      )
+    }
+    else {
+      return (
+        <></>
+      )
+    }
+
+  }
+
+  const Dinner = () => {
+    if (serverData) {
+      return (
+        serverData[0]['dinner'].map((item: any) => {
+          return (
+            <FoodCard key={item['recipe'].calories}  foodItem={item['recipe']} />
+          )
+        })
+      )
+    }
+    else {
+      return (
+        <></>
+      )
+    }
+
+  }
+
+  const Snacks = () => {
+    if (serverData) {
+      return (
+        serverData[0]['snacks'].map((item: any) => {
+          return (
+            <FoodCard key={item['recipe'].calories} foodItem={item['recipe']} />
+          )
+        })
+      ) 
+    }
+    else {
+      return (
+        <></>
+      )
+    }
+
+  }
+
+
+
+
 
   interface CreateFoodCardProps {
     src: string | StaticImageData;
@@ -309,8 +406,69 @@ export default function Home() {
   }
 
 
-  const FoodCard = ({ name, tags, details}: CreateFoodCardProps) => {
-  let [likeStatus, setLikeStatus] = useState(false)
+  const FoodCard = (foodItem: any) => {
+    let [likeStatus, setLikeStatus] = useState(false)
+
+    const handleSetFav = (likeStatus: boolean) => {
+      const _like = !likeStatus
+      setLikeStatus(likeStatus = _like)
+    }
+    const FavIcon = () => {
+      if (likeStatus === false) {
+        return (
+          <Image className='heart' src='/heartIcon.png' alt='fav icon' width={60} height={60}
+            onClick={() => handleSetFav(likeStatus)}
+            style={{
+              position: 'absolute',
+              top: '2px',
+            }}></Image>
+        )
+      }
+      else return (
+        <Image className='filled-heart' src='/filledHeartIcon.png' alt='filled fav icon' width={65} height={60}
+          onClick={() => handleSetFav(likeStatus)}
+          style={{
+            position: 'absolute',
+            top: '2px',
+          }}></Image>
+      )
+    }
+    try{
+    return (
+      <div key={foodItem.foodItem.calories} className='food-item'>
+        <div style={{
+          display: 'flex',
+          justifyContent: 'end'
+        }}>
+          <Image src='/pancake.png' alt='' width={'300'} height={100} style={{
+            objectFit: "cover",
+            borderRadius: "10px",
+          }}></Image>
+          <FavIcon />
+        </div>
+        <div className='food-name'>
+          <h3> {foodItem.foodItem.label}</h3>
+        </div>
+        <div className='food-details'>
+          <h3>Calories:</h3>
+          <h3> {foodItem.foodItem.calories}</h3>
+        </div>
+        <div className='food-tags-container'>
+          {(foodItem.foodItem.tags).slice(0, 4).map((element:any, index:number) => {
+            return (
+              <h3 className='food-tags-item' key={index}>{element}</h3>
+            )
+          })}
+        </div>
+      </div>
+    )
+        } catch (error) {
+          console.log(error)
+        }
+  }
+
+  const FoodCardPreview = ({ name, tags, details }: CreateFoodCardProps) => {
+    let [likeStatus, setLikeStatus] = useState(false)
 
     const handleSetFav = (likeStatus: boolean) => {
       const _like = !likeStatus
@@ -329,7 +487,7 @@ export default function Home() {
         )
       }
       else return (
-        <Image className='filled-heart' src='/filledHeartIcon.png' alt='filled fav icon' width={80} height={80}
+        <Image className='filled-heart' src='/filledHeartIcon.png' alt='filled fav icon' width={65} height={60}
           onClick={() => handleSetFav(likeStatus)}
           style={{
             position: 'absolute',
@@ -337,18 +495,18 @@ export default function Home() {
           }}></Image>
       )
     }
-    
+
     return (
       <div className='food-item'>
         <div style={{
           display: 'flex',
           justifyContent: 'end'
         }}>
-          <Image src='/pancake.png' alt='' width={350} height={250} style={{
+          <Image src='/pancake.png' alt='' width={'300'} height={100} style={{
             objectFit: "cover",
             borderRadius: "10px",
           }}></Image>
-          <FavIcon/>
+          <FavIcon />
         </div>
         <div className='food-name'>
           <h3> {name}</h3>
@@ -369,59 +527,55 @@ export default function Home() {
   }
 
   const MainContent = () => {
-    return(
+    return (
       <>
-      <div className='section'>
+        <div className='section'>
           <h1 className='section-header'>
             Top Picks
           </h1>
           <div className='food-container'>
-            <FoodCard src='/public/pancake.png' name='example Name1' tags={['placeholder1', 'placeholder2', 'mini']} details={'example Details'}  />
-            <FoodCard src='/public/pancake.png' name='example Name2' tags={['placeholder1', 'placeholder2']} details={'example Details'}/>
-            <FoodCard src='/public/pancake.png' name='example Name3' tags={['placeholder1', 'placeholder2']} details={'example Details'}/>
-            <FoodCard src='/public/pancake.png' name='example Name' tags={['placeholder1', 'placeholder2']} details={'example Details'}/>
-            <FoodCard src='/public/pancake.png' name='example Name' tags={['placeholder1', 'placeholder2']} details={'example Details'}/>
-            <FoodCard src='/public/pancake.png' name='example Name' tags={['placeholder1', 'placeholder2']} details={'example Details'}/>
-            <FoodCard src='/public/pancake.png' name='example Name' tags={['placeholder1', 'placeholder2']} details={'example Details'}/>
-            <FoodCard src='/public/pancake.png' name='example Name' tags={['placeholder1', 'placeholder2']} details={'example Details'}/>
-            <FoodCard src='/public/pancake.png' name='example Name' tags={['placeholder1', 'placeholder2']} details={'example Details'}/>
-            <FoodCard src='/public/pancake.png' name='example Name' tags={['placeholder1', 'placeholder2']} details={'example Details'}/>         
-             </div>
-        </div>
-        <div className='section'>
-          <h1 className='section-header'>
-            Other picks
-          </h1>
-          <div className='food-container'>
-            {/* <FoodCard src='/public/pancake.png' name='example Name' tags={['placeholder1', 'placeholder2', 'mini', 'something even longer']} details={'example Details'} />
-            <FoodCard src='/public/pancake.png' name='example Name' tags={['placeholder1', 'placeholder2']} details={'example Details'} />
-            <FoodCard src='/public/pancake.png' name='example Name' tags={['placeholder1', 'placeholder2']} details={'example Details'} />
-            <FoodCard src='/public/pancake.png' name='example Name' tags={['placeholder1', 'placeholder2']} details={'example Details'} />
-            <FoodCard src='/public/pancake.png' name='example Name' tags={['placeholder1', 'placeholder2']} details={'example Details'} />
-            <FoodCard src='/public/pancake.png' name='example Name' tags={['placeholder1', 'placeholder2']} details={'example Details'} />
-            <FoodCard src='/public/pancake.png' name='example Name' tags={['placeholder1', 'placeholder2']} details={'example Details'} />
-            <FoodCard src='/public/pancake.png' name='example Name' tags={['placeholder1', 'placeholder2']} details={'example Details'} />
-            <FoodCard src='/public/pancake.png' name='example Name' tags={['placeholder1', 'placeholder2']} details={'example Details'} />
-            <FoodCard src='/public/pancake.png' name='example Name' tags={['placeholder1', 'placeholder2']} details={'example Details'} />
-            <FoodCard src='/public/pancake.png' name='example Name' tags={['placeholder1', 'placeholder2']} details={'example Details'} /> <FoodCard src ='/public/pancake.png'name='example Name' tags={['placeholder1', 'placeholder2']} details={'example Details'} /> */}
+            {/* <FoodCardPreview src='/public/pancake.png' name='example Name1' tags={['placeholder1', 'placeholder2', 'mini']} details={'example Details'} />
+            <FoodCardPreview src='/public/pancake.png' name='example Name2' tags={['placeholder1', 'placeholder2']} details={'example Details'} />
+            <FoodCardPreview src='/public/pancake.png' name='example Name3' tags={['placeholder1', 'placeholder2']} details={'example Details'} />
+            <FoodCardPreview src='/public/pancake.png' name='example Name' tags={['placeholder1', 'placeholder2']} details={'example Details'} />
+            <FoodCardPreview src='/public/pancake.png' name='example Name' tags={['placeholder1', 'placeholder2']} details={'example Details'} />
+            <FoodCardPreview src='/public/pancake.png' name='example Name' tags={['placeholder1', 'placeholder2']} details={'example Details'} />
+            <FoodCardPreview src='/public/pancake.png' name='example Name' tags={['placeholder1', 'placeholder2']} details={'example Details'} />
+            <FoodCardPreview src='/public/pancake.png' name='example Name' tags={['placeholder1', 'placeholder2']} details={'example Details'} />
+            <FoodCardPreview src='/public/pancake.png' name='example Name' tags={['placeholder1', 'placeholder2']} details={'example Details'} />
+            <FoodCardPreview src='/public/pancake.png' name='example Name' tags={['placeholder1', 'placeholder2']} details={'example Details'} /> */}
           </div>
         </div>
         <div className='section'>
           <h1 className='section-header'>
-            Other other picks
+            Breakfast
           </h1>
           <div className='food-container'>
-            {/* <FoodCard src='/public/pancake.png' name='example Name' tags={['placeholder1', 'placeholder2', 'mini', 'something ', 'm']} details={'example Details'} />
-            <FoodCard src='/public/pancake.png' name='example Name' tags={['placeholder1', 'placeholder2']} details={'example Details'} />
-            <FoodCard src='/public/pancake.png' name='example Name' tags={['placeholder1', 'placeholder2']} details={'example Details'} />
-            <FoodCard src='/public/pancake.png' name='example Name' tags={['placeholder1', 'placeholder2']} details={'example Details'} />
-            <FoodCard src='/public/pancake.png' name='example Name' tags={['placeholder1', 'placeholder2']} details={'example Details'} />
-            <FoodCard src='/public/pancake.png' name='example Name' tags={['placeholder1', 'placeholder2']} details={'example Details'} />
-            <FoodCard src='/public/pancake.png' name='example Name' tags={['placeholder1', 'placeholder2']} details={'example Details'} />
-            <FoodCard src='/public/pancake.png' name='example Name' tags={['placeholder1', 'placeholder2']} details={'example Details'} />
-            <FoodCard src='/public/pancake.png' name='example Name' tags={['placeholder1', 'placeholder2']} details={'example Details'} />
-            <FoodCard src='/public/pancake.png' name='example Name' tags={['placeholder1', 'placeholder2']} details={'example Details'} />
-            <FoodCard src='/public/pancake.png' name='example Name' tags={['placeholder1', 'placeholder2']} details={'example Details'} /> <FoodCard src ='/public/pancake.png'name='example Name' tags={['placeholder1', 'placeholder2']} details={'example Details'} /> */}
+            <Breakfast />
+          </div>
+        </div>
+        <div className='section'>
+          <h1 className='section-header'>
+            Lunch
+          </h1>
+          <div className='food-container'>
+            <Lunch/>
+          </div>
+        </div>
+        <div className='section'>
+          <h1 className='section-header'>
+            Dinner
+          </h1>
+          <div className='food-container'>
+            <Dinner/>
+          </div>
+        </div>
+        <div className='section'>
+          <h1 className='section-header'>
+            Snacks
+          </h1>
+          <div className='food-container'>
+            <Snacks/>
           </div>
         </div>
       </>
@@ -430,54 +584,54 @@ export default function Home() {
 
   const ViewPortContent = () => {
     // would like to change from any
-    const SearchContent = (item:any) => {
+    const SearchContent = (item: any) => {
       return (
-       <>
-          <div className='section '>
+        <>
+          <div className='section search-section'>
             <h3 className='section-header'>Found {item.item.length} results</h3>
-            <div className= 'search-container' key ={item.item.name}>
-              {item.item.map((element:any )=> {
+            <div className='search-container' key={item.item.name}>
+              {item.item.map((element: any) => {
                 return (
-                    <div className='search-item search-item-section' >
-                      <Image  key ={item.item.name} src={element.src} alt='' width={250} height={150} style={{
-                        objectFit: "cover",
+                  <div className='search-item search-item-section' >
+                    <Image key={item.item.name} src={element.src} alt='' width={250} height={150} style={{
+                      objectFit: "cover",
                       borderRadius: "10px",
                     }}></Image>
                     <p style={{}}> {element.name}</p>
-                    </div>
+                  </div>
                 )
               })}
             </div>
           </div>
-       </>
+        </>
       )
     }
 
     if (searchInput !== '') {
       const nameHolder: { name: string; index: number; details: number; src: string; tags: string[]; friends: { id: number; name: string; }[]; }[] = []
       data.forEach((element) => {
+        // console.log(serverData[0]['breakfast'])
         if (element.name.toLowerCase().includes(searchInput.toLowerCase())) {
           nameHolder.push(element)
         }
       })
       return (
-        <p><SearchContent item={nameHolder}/></p>
+        <><SearchContent item={nameHolder} /></>
       )
     }
-    
+
     else {
       return (
-        <MainContent/>
+        <MainContent />
       )
     }
-    
+
   }
   function handleForm(event: React.FormEvent<HTMLFormElement>): void {
     event.preventDefault()
-
   }
 
-  function handleSearch(event:React.FormEvent<HTMLInputElement>): void {
+  function handleSearch(event: React.FormEvent<HTMLInputElement>): void {
     var search = (event.target as HTMLTextAreaElement).value.toLowerCase();
     setSearchInput(search)
   }
@@ -491,14 +645,14 @@ export default function Home() {
         </div>
         <div className='nav-icons'>
           <form onSubmit={(event) => handleForm(event)}>
-            <input type='text' placeholder='Search for pancakes, tofu, steak flour...' onChange={(event)=>handleSearch(event)}></input>
+            <input type='text' placeholder='Search for pancakes, tofu, steak flour...' onChange={(event) => handleSearch(event)}></input>
           </form>
           <div className='calender'><Image src='/calender.png' alt='calender icon' width={70} height={70} color='black'></Image></div>
           <div className='basket'><Image className='basket' src='/basket.png' alt='calender icon' width={70} height={70} color='black'></Image></div>
         </div>
       </nav>
       <div>
-        <ViewPortContent/>
+        <ViewPortContent />
       </div>
     </main>
   )
