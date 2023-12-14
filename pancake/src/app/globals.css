@@ -32,6 +32,16 @@ h3 {
   justify-content: space-between;
   padding: 2.5px;
   align-items: center;
+  position: fixed;
+  width: 100%;
+  top: 0;
+  left: 0%;
+  right: 2%;
+  z-index: 100;
+  /* background: #d1cec5; */
+  backdrop-filter: blur(10px);
+
+  border-bottom: black solid 2px;
 }
 
 .menu-logo {
@@ -42,12 +52,17 @@ h3 {
  font-family: fantasy;
  font-size: 30px;
  letter-spacing: .2rem;
+ margin-left:2.5%;
 }
 
 .nav-icons {
  align-items: center;
  display:flex;
  gap: 0 40px;
+}
+
+.basket{
+  margin-right:2.5%;
 }
 .nav-icons .basket :hover {
   filter: drop-shadow(black 1px 1px 1px);
@@ -81,7 +96,7 @@ input[type=text] :focus {
 }
 
 .section:first-of-type {
-  margin-top: 75px;
+  margin-top: 150px;
 }
 .section {
   margin-top: 5px;
@@ -119,6 +134,7 @@ input[type=text] :focus {
   border: 1px solid rgba(255,255,255,.0);
   animation: fadeInAnimation ease 0.5s;
   animation-iteration-count: 1;
+  /* background-color:#FFFBF0; */
 }
 
 .food-item:last-child {
@@ -128,6 +144,7 @@ input[type=text] :focus {
 .food-item:hover{
   border: black solid 1px;
   border-radius: 12px;
+  background: linear-gradient(#FFFBF0, #D0D6C8)
 }
 
 .food-name {

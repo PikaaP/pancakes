@@ -428,7 +428,7 @@ export default function Home() {
     const FavIcon = () => {
       if (likeStatus === false) {
         return (
-          <Image className='heart' src='/heartIcon.png' alt='fav icon' width={40} height={40}
+          <Image draggable={false} className='heart' src='/heartIcon.png' alt='fav icon' width={40} height={40}
             onClick={() => handleSetFav(likeStatus)}
             style={{
               height: 'auto',
@@ -438,7 +438,7 @@ export default function Home() {
         )
       }
       else return (
-        <Image className='filled-heart' src='/filledHeartIcon.png' alt='filled fav icon' width={40} height={40}
+        <Image draggable={false} className='filled-heart' src='/filledHeartIcon.png' alt='filled fav icon' width={40} height={40}
           onClick={() => handleSetFav(likeStatus)}
           style={{
             position: 'absolute',
@@ -513,43 +513,48 @@ export default function Home() {
   const MainContent = () => {
     return (
       <>
-        <div className='section'>
+      {/* <div className='billboard'>
+        
+      </div> */}
+        {/* <div className='section'>
           <h1 className='section-header'>
             Top Picks
           </h1>
           <div className='food-container'>
           </div>
-        </div>
-        <div className='section'>
-          <h1 className='section-header'>
-            Breakfast
-          </h1>
-          <div className='food-container'>
-            <Breakfast />
+        </div> */}
+        <div>
+          <div className='section'>
+            <h1 className='section-header'>
+              Breakfast
+            </h1>
+            <div className='food-container'>
+              <Breakfast />
+            </div>
           </div>
-        </div>
-        <div className='section'>
-          <h1 className='section-header'>
-            Lunch
-          </h1>
-          <div className='food-container'>
-            <Lunch />
+          <div className='section'>
+            <h1 className='section-header'>
+              Lunch
+            </h1>
+            <div className='food-container'>
+              <Lunch />
+            </div>
           </div>
-        </div>
-        <div className='section'>
-          <h1 className='section-header'>
-            Dinner
-          </h1>
-          <div className='food-container'>
-            <Dinner />
+          <div className='section'>
+            <h1 className='section-header'>
+              Dinner
+            </h1>
+            <div className='food-container'>
+              <Dinner />
+            </div>
           </div>
-        </div>
-        <div className='section'>
-          <h1 className='section-header'>
-            Snacks
-          </h1>
-          <div className='food-container'>
-            <Snacks />
+          <div className='section'>
+            <h1 className='section-header'>
+              Snacks
+            </h1>
+            <div className='food-container'>
+              <Snacks />
+            </div>
           </div>
         </div>
       </>
