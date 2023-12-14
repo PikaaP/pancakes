@@ -513,17 +513,26 @@ export default function Home() {
   const MainContent = () => {
     return (
       <>
-      {/* <div className='billboard'>
-        
-      </div> */}
+      <div className='billboard-container'>
+        <div className='billboard'>
+          <video playsInline autoPlay muted loop style={{
+            width:'100%',
+            height:'100%',
+            objectFit:'cover',
+            WebkitMaskImage: "-webkit-gradient(linear, left top, left bottom, from(rgba(0,0,0,1)), to(rgba(255, 251, 240,0)))"
+          }}>
+            <source src= {'/billboardVideo.mp4'}></source>
+          </video>
+        </div>
+      </div>
         {/* <div className='section'>
-          <h1 className='section-header'>
+          <h1 className='section-header'> 
             Top Picks
           </h1>
           <div className='food-container'>
           </div>
         </div> */}
-        <div>
+        <div className='mainContent'>
           <div className='section'>
             <h1 className='section-header'>
               Breakfast

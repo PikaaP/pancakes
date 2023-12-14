@@ -2,6 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
+@font-face {
+  font-family: 'Kalam';
+  src: local('Kalam') url('/fonts/Kalam/Kalam-Regular.ttf') format('ttf');
+ }
+
 :root {
   /* --foreground-rgb: 0, 0, 0;
   --background-start-rgb: 214, 219, 220;
@@ -22,6 +27,8 @@ body {
   color: black;
   background:  #FFFBF0;
   margin: 0 5%;
+  font-family: Kalam;
+
 }
 
 h3 {
@@ -49,7 +56,6 @@ h3 {
  align-items: center;
  display:flex;
  gap: 0 40px;
- font-family: fantasy;
  font-size: 30px;
  letter-spacing: .2rem;
  margin-left:2.5%;
@@ -95,9 +101,41 @@ input[type=text] :focus {
   outline: none;
 }
 
-.section:first-of-type {
-  margin-top: 150px;
+.billboard {
+  position: relative;
+  width: 100vw;
+  left: calc(-50vw + 50%);
+  height: 75vh;
+  object-fit: cover;
+  animation: fadeInAnimation ease 2.5s;
+  animation-iteration-count: 1; 
+  z-index:-1;
+  
 }
+
+.billboard-container:after {
+    /* content: "";
+    position: relative;
+    z-index: -1;
+    bottom: 0;
+    left: 0;
+    pointer-events: none;
+    background-image: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255, 1) 90%);
+    width: 100%;
+    height: 100%; */
+
+
+  
+}
+
+.mainContent {
+  margin-top: -20;
+}
+
+.section:first-of-type {
+  margin-top: -20vh;
+}
+
 .section {
   margin-top: 5px;
   min-width: 95vw;
@@ -112,7 +150,6 @@ input[type=text] :focus {
 .section-header {
   margin-bottom: 5px;
   margin-top: 15px;
-  font-family: fantasy;
   font-size: 25px;
   letter-spacing: .2rem;
 }
