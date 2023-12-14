@@ -1,4 +1,5 @@
 'use client';
+typeof window === "undefined"
 
 import { StaticImageData, StaticImport } from 'next/dist/shared/lib/get-img-props';
 import Image from 'next/image'
@@ -6,6 +7,7 @@ import React, { SetStateAction } from "react";
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 
+const iconSize = 60
 var data = [
   {
     "name": "Trina",
@@ -334,7 +336,7 @@ export default function Home() {
     }
     else {
       return (
-        <></>
+        <FoodCardPreview />
       )
     }
 
@@ -352,7 +354,7 @@ export default function Home() {
     }
     else {
       return (
-        <></>
+        <FoodCardPreview />
       )
     }
 
@@ -363,14 +365,14 @@ export default function Home() {
       return (
         serverData[0]['dinner'].map((item: any) => {
           return (
-            <FoodCard key={item['recipe'].calories}  foodItem={item['recipe']} />
+            <FoodCard key={item['recipe'].calories} foodItem={item['recipe']} />
           )
         })
       )
     }
     else {
       return (
-        <></>
+        <FoodCardPreview />
       )
     }
 
@@ -384,27 +386,15 @@ export default function Home() {
             <FoodCard key={item['recipe'].calories} foodItem={item['recipe']} />
           )
         })
-      ) 
+      )
     }
     else {
       return (
-        <></>
+        <FoodCardPreview />
       )
     }
 
   }
-
-
-
-
-
-  interface CreateFoodCardProps {
-    src: string | StaticImageData;
-    name: String
-    tags: Array<String>
-    details: String
-  }
-
 
   const FoodCard = (foodItem: any) => {
     let [likeStatus, setLikeStatus] = useState(false)
@@ -413,19 +403,42 @@ export default function Home() {
       const _like = !likeStatus
       setLikeStatus(likeStatus = _like)
     }
+
+    const Tags = () => {
+      if (foodItem.foodItem.tags) {
+        return (
+          (foodItem.foodItem.tags).slice(0, 4).map((element: any, index: number) => {
+            return (
+              <h3 className='food-tags-item' key={index}>{element}</h3>
+            )
+          })
+        )
+      }
+      else if (foodItem.foodItem.healthLabels) {
+        return (
+          (foodItem.foodItem.healthLabels).slice(0, 4).map((element: any, index: number) => {
+            return (
+              <h3 className='food-tags-item' key={index}>{element}</h3>
+            )
+          })
+        )
+      }
+
+    }
     const FavIcon = () => {
       if (likeStatus === false) {
         return (
-          <Image className='heart' src='/heartIcon.png' alt='fav icon' width={60} height={60}
+          <Image className='heart' src='/heartIcon.png' alt='fav icon' width={40} height={40}
             onClick={() => handleSetFav(likeStatus)}
             style={{
+              height: 'auto',
               position: 'absolute',
               top: '2px',
             }}></Image>
         )
       }
       else return (
-        <Image className='filled-heart' src='/filledHeartIcon.png' alt='filled fav icon' width={65} height={60}
+        <Image className='filled-heart' src='/filledHeartIcon.png' alt='filled fav icon' width={40} height={40}
           onClick={() => handleSetFav(likeStatus)}
           style={{
             position: 'absolute',
@@ -433,97 +446,68 @@ export default function Home() {
           }}></Image>
       )
     }
-    try{
-    return (
-      <div key={foodItem.foodItem.calories} className='food-item'>
-        <div style={{
-          display: 'flex',
-          justifyContent: 'end'
-        }}>
-          <Image src='/pancake.png' alt='' width={'300'} height={100} style={{
-            objectFit: "cover",
-            borderRadius: "10px",
-          }}></Image>
-          <FavIcon />
+    try {
+      const delay = 10
+      return (
+        <div draggable={true} className='food-item'>
+          <div key={foodItem.foodItem.calories} draggable={true}>
+            <div style={{
+              display: 'flex',
+              justifyContent: 'end'
+            }}>
+              <Image src='/pancake.png' alt='' draggable={false} width={220} height={70} style={{
+                objectFit: "cover",
+                borderRadius: "10px",
+              }}></Image>
+              <FavIcon />
+            </div>
+            <div className='food-name'>
+              <h3> {foodItem.foodItem.label}</h3>
+            </div>
+            <div className='food-details'>
+              <h3>Calories: {Math.round(foodItem.foodItem.calories)}</h3>
+              <h3> </h3>
+            </div>
+            <div className='food-tags-container'>
+                <Tags/>
+            </div>
+          </div>
         </div>
-        <div className='food-name'>
-          <h3> {foodItem.foodItem.label}</h3>
-        </div>
-        <div className='food-details'>
-          <h3>Calories:</h3>
-          <h3> {foodItem.foodItem.calories}</h3>
-        </div>
-        <div className='food-tags-container'>
-          {(foodItem.foodItem.tags).slice(0, 4).map((element:any, index:number) => {
-            return (
-              <h3 className='food-tags-item' key={index}>{element}</h3>
-            )
-          })}
-        </div>
-      </div>
-    )
-        } catch (error) {
-          console.log(error)
-        }
+      )
+    } catch (error) {
+      console.log(error)
+    }
   }
 
-  const FoodCardPreview = ({ name, tags, details }: CreateFoodCardProps) => {
-    let [likeStatus, setLikeStatus] = useState(false)
+  const FoodCardPreview = () => {
 
-    const handleSetFav = (likeStatus: boolean) => {
-      const _like = !likeStatus
-      setLikeStatus(likeStatus = _like)
-    }
+    const n = Math.round(1920 / 300)
 
-    const FavIcon = () => {
-      if (likeStatus === false) {
-        return (
-          <Image className='heart' src='/heartIcon.png' alt='fav icon' width={60} height={60}
-            onClick={() => handleSetFav(likeStatus)}
-            style={{
-              position: 'absolute',
-              top: '2px',
-            }}></Image>
-        )
-      }
-      else return (
-        <Image className='filled-heart' src='/filledHeartIcon.png' alt='filled fav icon' width={65} height={60}
-          onClick={() => handleSetFav(likeStatus)}
-          style={{
-            position: 'absolute',
-            top: '2px',
-          }}></Image>
+    return [...Array(n)].map((i: number, index) => {
+      return (
+        <div className='food-item' key={index} >
+          <div style={{
+            display: 'flex',
+            justifyContent: 'end'
+          }}>
+            <div style={{
+              width: '220px',
+              height: '120px',
+              background: 'grey'
+            }}>
+            </div>
+          </div>
+          <div className='food-name'>
+          </div>
+          <div className='food-details'>
+          </div>
+          <div className='food-tags-container'>
+          </div>
+        </div>
       )
     }
-
-    return (
-      <div className='food-item'>
-        <div style={{
-          display: 'flex',
-          justifyContent: 'end'
-        }}>
-          <Image src='/pancake.png' alt='' width={'300'} height={100} style={{
-            objectFit: "cover",
-            borderRadius: "10px",
-          }}></Image>
-          <FavIcon />
-        </div>
-        <div className='food-name'>
-          <h3> {name}</h3>
-        </div>
-        <div className='food-details'>
-          <h3>Time to prepare</h3>
-          <h3> {details}</h3>
-        </div>
-        <div className='food-tags-container'>
-          {tags.map((element, index) => {
-            return (
-              <h3 className='food-tags-item' key={index}>{element}</h3>
-            )
-          })}
-        </div>
-      </div>
     )
+
   }
 
   const MainContent = () => {
@@ -534,16 +518,6 @@ export default function Home() {
             Top Picks
           </h1>
           <div className='food-container'>
-            {/* <FoodCardPreview src='/public/pancake.png' name='example Name1' tags={['placeholder1', 'placeholder2', 'mini']} details={'example Details'} />
-            <FoodCardPreview src='/public/pancake.png' name='example Name2' tags={['placeholder1', 'placeholder2']} details={'example Details'} />
-            <FoodCardPreview src='/public/pancake.png' name='example Name3' tags={['placeholder1', 'placeholder2']} details={'example Details'} />
-            <FoodCardPreview src='/public/pancake.png' name='example Name' tags={['placeholder1', 'placeholder2']} details={'example Details'} />
-            <FoodCardPreview src='/public/pancake.png' name='example Name' tags={['placeholder1', 'placeholder2']} details={'example Details'} />
-            <FoodCardPreview src='/public/pancake.png' name='example Name' tags={['placeholder1', 'placeholder2']} details={'example Details'} />
-            <FoodCardPreview src='/public/pancake.png' name='example Name' tags={['placeholder1', 'placeholder2']} details={'example Details'} />
-            <FoodCardPreview src='/public/pancake.png' name='example Name' tags={['placeholder1', 'placeholder2']} details={'example Details'} />
-            <FoodCardPreview src='/public/pancake.png' name='example Name' tags={['placeholder1', 'placeholder2']} details={'example Details'} />
-            <FoodCardPreview src='/public/pancake.png' name='example Name' tags={['placeholder1', 'placeholder2']} details={'example Details'} /> */}
           </div>
         </div>
         <div className='section'>
@@ -559,7 +533,7 @@ export default function Home() {
             Lunch
           </h1>
           <div className='food-container'>
-            <Lunch/>
+            <Lunch />
           </div>
         </div>
         <div className='section'>
@@ -567,7 +541,7 @@ export default function Home() {
             Dinner
           </h1>
           <div className='food-container'>
-            <Dinner/>
+            <Dinner />
           </div>
         </div>
         <div className='section'>
@@ -575,7 +549,7 @@ export default function Home() {
             Snacks
           </h1>
           <div className='food-container'>
-            <Snacks/>
+            <Snacks />
           </div>
         </div>
       </>
@@ -592,7 +566,7 @@ export default function Home() {
             <div className='search-container' key={item.item.name}>
               {item.item.map((element: any) => {
                 return (
-                  <div className='search-item search-item-section' >
+                  <div className='search-item-section' >
                     <Image key={item.item.name} src={element.src} alt='' width={250} height={150} style={{
                       objectFit: "cover",
                       borderRadius: "10px",
@@ -610,7 +584,6 @@ export default function Home() {
     if (searchInput !== '') {
       const nameHolder: { name: string; index: number; details: number; src: string; tags: string[]; friends: { id: number; name: string; }[]; }[] = []
       data.forEach((element) => {
-        // console.log(serverData[0]['breakfast'])
         if (element.name.toLowerCase().includes(searchInput.toLowerCase())) {
           nameHolder.push(element)
         }
@@ -631,7 +604,19 @@ export default function Home() {
     event.preventDefault()
   }
 
+  function handleDragOver(event: any) {
+    event.preventDefault()
+  }
+
+  function handleDragEnter(event: any) {
+    event.preventDefault()
+    return (
+      <div style={{ cursor: 'copy' }}></div>
+    )
+  }
+
   function handleSearch(event: React.FormEvent<HTMLInputElement>): void {
+
     var search = (event.target as HTMLTextAreaElement).value.toLowerCase();
     setSearchInput(search)
   }
@@ -640,15 +625,15 @@ export default function Home() {
     <main>
       <nav className='nav-container'>
         <div className='menu-logo'>
-          <Image src='/menu.png' alt='menu icon' width={60} height={60} color='black'></Image>
+          <Image src='/menu.png' alt='menu icon' width={iconSize} height={iconSize} color='black'></Image>
           <a >Pancake</a>
         </div>
         <div className='nav-icons'>
           <form onSubmit={(event) => handleForm(event)}>
             <input type='text' placeholder='Search for pancakes, tofu, steak flour...' onChange={(event) => handleSearch(event)}></input>
           </form>
-          <div className='calender'><Image src='/calender.png' alt='calender icon' width={70} height={70} color='black'></Image></div>
-          <div className='basket'><Image className='basket' src='/basket.png' alt='calender icon' width={70} height={70} color='black'></Image></div>
+          <div className='calender'><Image src='/calender.png' alt='calender icon' width={iconSize} height={iconSize} color='black'></Image></div>
+          <div className='basket' onDragEnter={(event) => handleDragEnter(event)} onDragOver={(event) => handleDragOver(event)}><Image className='basket' src='/basket.png' alt='calender icon' width={iconSize} height={iconSize} color='black'></Image></div>
         </div>
       </nav>
       <div>

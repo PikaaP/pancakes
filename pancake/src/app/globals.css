@@ -18,28 +18,29 @@
   }
 }
 
-main {
-
-}
 body {
   color: black;
   background:  #FFFBF0;
   margin: 0 5%;
 }
 
+h3 {
+  font-size: 15px;
+}
 .nav-container {
   display: flex;
   justify-content: space-between;
-  padding: 5px;
+  padding: 2.5px;
   align-items: center;
 }
 
 .menu-logo {
+  height: auto;
  align-items: center;
  display:flex;
  gap: 0 40px;
  font-family: fantasy;
- font-size: 40px;
+ font-size: 30px;
  letter-spacing: .2rem;
 }
 
@@ -83,8 +84,9 @@ input[type=text] :focus {
   margin-top: 75px;
 }
 .section {
-  margin-top: 10px;
+  margin-top: 5px;
   min-width: 95vw;
+  min-height: fit-content;
 }
 
 .section .search-section{
@@ -93,16 +95,16 @@ input[type=text] :focus {
 }
 
 .section-header {
-  margin-bottom: 15px;
-  margin-top: 40px;
+  margin-bottom: 5px;
+  margin-top: 15px;
   font-family: fantasy;
-  font-size: 30px;
+  font-size: 25px;
   letter-spacing: .2rem;
 }
 
 .food-container{
   display:flex;
-  gap: 40px;
+  gap: 30px;
   overflow-x: auto;
   filter: drop-shadow(black 1px 1px 1px);
 }
@@ -113,12 +115,18 @@ input[type=text] :focus {
 
 .food-item {
   flex-shrink: 0;
-  max-width: 300px;
+  max-width: 220px;
   border: 1px solid rgba(255,255,255,.0);
+  animation: fadeInAnimation ease 0.5s;
+  animation-iteration-count: 1;
+}
+
+.food-item:last-child {
+  margin-right: 30px;
 }
 
 .food-item:hover{
-  border: black solid 0.5px;
+  border: black solid 1px;
   border-radius: 12px;
 }
 
@@ -132,7 +140,7 @@ input[type=text] :focus {
 .food-details {
   display: flex;
   justify-content: space-between;
-  padding: 0.12.5em;
+  padding: 0.25em;
   border-radius: 21px;
   background-color: #A0B2A7;
 }
@@ -185,10 +193,4 @@ input[type=text] :focus {
   gap: 10px;
   flex-wrap: wrap;
   filter: drop-shadow(black 1px 1px 1px);
-}
-
-.search-item {
-  /* flex-shrink: 0; */
-  /* max-width: 350px;
-  border: 1px solid rgba(255,255,255,.0); */
 }
