@@ -575,7 +575,7 @@ export default function Home() {
     const SearchContent = (item: any) => {
       return (
         <>
-          <div className='section search-section'>
+          <div className='search-section'>
             <h3 className='section-header'>Found {item.item.length} results</h3>
             <div className='search-container' key={item.item.name}>
               {item.item.map((element: any) => {

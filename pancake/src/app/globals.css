@@ -142,8 +142,8 @@ input[type=text] :focus {
   min-height: fit-content;
 }
 
-.section .search-section{
-  margin-top: 10px;
+.search-section{
+  margin-top: 10%;
   width: 100
 }
 
