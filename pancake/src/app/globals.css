@@ -45,9 +45,8 @@ h3 {
   left: 0%;
   right: 2%;
   z-index: 100;
-  /* background: #d1cec5; */
-  backdrop-filter: blur(10px);
 
+  backdrop-filter: blur(10px);
   border-bottom: black solid 2px;
 }
 
@@ -70,6 +69,18 @@ h3 {
 .basket{
   margin-right:2.5%;
 }
+
+.drop-down-items-container {
+  position: absolute;
+  display: block;
+
+  right: 0;
+}
+
+.drop-down-items:first-of-type {
+  margin-top: 20px;
+}
+
 .nav-icons .basket :hover {
   filter: drop-shadow(black 1px 1px 1px);
   background: radial-gradient(circle at 50% 50%, rgba(123,181,200, 0.15),rgba(255, 255, 255, 0) 75%)
@@ -113,20 +124,6 @@ input[type=text] :focus {
   
 }
 
-.billboard-container:after {
-    /* content: "";
-    position: relative;
-    z-index: -1;
-    bottom: 0;
-    left: 0;
-    pointer-events: none;
-    background-image: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255, 1) 90%);
-    width: 100%;
-    height: 100%; */
-
-
-  
-}
 
 .mainContent {
   margin-top: -20;
@@ -139,7 +136,7 @@ input[type=text] :focus {
 .section {
   margin-top: 5px;
   min-width: 95vw;
-  min-height: fit-content;
+  min-height: 430px;
 }
 
 .search-section{
@@ -159,6 +156,7 @@ input[type=text] :focus {
   gap: 30px;
   overflow-x: auto;
   filter: drop-shadow(black 1px 1px 1px);
+  height:
 }
 
 .food-container::-webkit-scrollbar{
@@ -169,9 +167,31 @@ input[type=text] :focus {
   flex-shrink: 0;
   max-width: 220px;
   border: 1px solid rgba(255,255,255,.0);
-  animation: fadeInAnimation ease 0.5s;
-  animation-iteration-count: 1;
-  /* background-color:#FFFBF0; */
+  animation: fadeInAnimation ease .75s;
+  /* animation-iteration-count: 1; */
+}
+
+
+.food-item-mouseEnter {
+  flex-shrink: 0;
+  max-width: 220px;
+  height: min-content;
+  border: 1px solid rgba(255,255,255,.0);
+  /* animation: fadeInAnimation ease 0.5s; */
+  /* animation-iteration-count: 1;
+  transition: max-width 1s; */
+}
+
+.food-item-mouseEnter:last-child {
+  margin-right: 30px;
+}
+
+.food-item-mouseEnter:hover {
+  max-width: 320px;
+}
+
+.food-item-mouseEnter:not(:hover) {
+  max-width: 220px;
 }
 
 .food-item:last-child {

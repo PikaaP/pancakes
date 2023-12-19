@@ -1,5 +1,5 @@
 'use client';
-typeof window === "undefined"
+// typeof window === "undefined"
 
 import { StaticImageData, StaticImport } from 'next/dist/shared/lib/get-img-props';
 import Image from 'next/image'
@@ -302,14 +302,11 @@ var data = [
 
 export default function Home() {
 
-
   const [searchInput, setSearchInput] = useState(String)
   let [serverData, setServerData] = useState<any>()
 
-  function collectData(route: string): void {
-
-
-  }
+  const [state, updateState] = useState<any>();
+  // const forceUpdate = React.useCallback(() => updateState({}), []);
 
   useEffect(
     () => {
@@ -397,12 +394,12 @@ export default function Home() {
   }
 
   const FoodCard = (foodItem: any) => {
+    let [mouseEnter, setMouseEnter] = useState(false)
     let [likeStatus, setLikeStatus] = useState(false)
 
-    const handleSetFav = (likeStatus: boolean) => {
-      const _like = !likeStatus
-      setLikeStatus(likeStatus = _like)
-    }
+    let [timer, setTimer] = useState<boolean>(false)
+
+    let temptimer = false
 
     const Tags = () => {
       if (foodItem.foodItem.tags) {
@@ -426,31 +423,140 @@ export default function Home() {
 
     }
     const FavIcon = () => {
+
+      const handleSetFav = (likeStatus: boolean) => {
+        setLikeStatus(!likeStatus)
+      }
+
+
+
       if (likeStatus === false) {
         return (
-          <Image draggable={false} className='heart' src='/heartIcon.png' alt='fav icon' width={40} height={40}
-            onClick={() => handleSetFav(likeStatus)}
-            style={{
-              height: 'auto',
-              position: 'absolute',
-              top: '2px',
-            }}></Image>
+          <>
+            <Image draggable={false} className='heart' src='/heartIcon.png' alt='fav icon' width={40} height={40}
+              onClick={() => handleSetFav(likeStatus)}></Image>
+          </>
         )
       }
       else return (
         <Image draggable={false} className='filled-heart' src='/filledHeartIcon.png' alt='filled fav icon' width={40} height={40}
-          onClick={() => handleSetFav(likeStatus)}
-          style={{
-            position: 'absolute',
-            top: '2px',
-          }}></Image>
+          onClick={() => handleSetFav(likeStatus)}></Image>
       )
     }
-    try {
-      const delay = 10
-      return (
-        <div draggable={true} className='food-item'>
-          <div key={foodItem.foodItem.calories} draggable={true}>
+    let [basketStatus, setBasketStatus] = useState(false)
+
+    const BasketIcon = () => {
+
+      if (typeof window !== 'undefined') {
+        for (var i = 0; i < sessionStorage.length; i++) {
+          const key = sessionStorage.key(i)
+          if (sessionStorage.getItem(key!) == `"` + foodItem.foodItem.label + `"`) {
+            useEffect(() => setBasketStatus(true), [])
+          }
+        }
+      }
+
+      function handleAddBasket(cartItem: any): void {
+        if (typeof window !== 'undefined') {
+          sessionStorage.setItem(cartItem.foodItem.label, JSON.stringify(cartItem.foodItem.label))
+          for (var i = 0; i < sessionStorage.length; i++) {
+            const key = sessionStorage.key(i)
+          }
+          setBasketStatus(true)
+        }
+      }
+
+      function handleRemoveasket(cartItem: any): void {
+        if (typeof window !== 'undefined') {
+          sessionStorage.removeItem(cartItem.foodItem.label);
+          setBasketStatus(false)
+        }
+      }
+
+      if (basketStatus) {
+        return (
+          <button onClick={() => handleRemoveasket(foodItem)}>Remove</button>
+        )
+      }
+
+      else return (
+        <button onClick={() => handleAddBasket(foodItem)}>Add to basket</button>
+      )
+    }
+
+
+
+    if (mouseEnter == true) {
+
+
+      function timeout(ms: number) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+      }
+      try {
+
+
+        return (
+          <div className='food-item-mouseEnter' key={foodItem.foodItem.calories} draggable={true}
+            onMouseLeave={() => {
+              temptimer = false
+              setTimer(false)
+              setMouseEnter(false)
+            }}
+          >
+            <div style={{
+              display: 'block',
+            }}>
+              <Image src='/pancake.png' alt='' draggable={false} width={320} height={170} style={{
+                objectFit: "cover",
+                borderRadius: "10px",
+              }}></Image>
+              <div style={{
+                backgroundColor: 'red',
+                height: "auto",
+                width: '318px',
+                marginTop: -10,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'end',
+
+              }}>
+                <FavIcon />
+                <BasketIcon />
+              </div>
+            </div>
+          </div>
+        )
+      } catch (err) {
+        console.log(err)
+      }
+    }
+    else {
+      try {
+        function timeout(ms: number) {
+          return new Promise(resolve => setTimeout(resolve, ms));
+        }
+        return (
+          <div className='food-item' key={foodItem.foodItem.calories} draggable={true}
+            onMouseEnter={async () => {
+              temptimer = true
+              setTimer(true)
+              await timeout(300)
+              // console.log('this is temptimer after timeout', temptimer)
+              if (temptimer) {
+                setMouseEnter(true)
+                // console.log('temptimer is true')
+              }
+
+            }}
+
+            onMouseLeave={() => {
+              temptimer = false
+              setTimer(false)
+              setMouseEnter(false)
+
+              // console.log('this is timer on mouse leave', temptimer)
+            }}
+          >
             <div style={{
               display: 'flex',
               justifyContent: 'end'
@@ -459,7 +565,7 @@ export default function Home() {
                 objectFit: "cover",
                 borderRadius: "10px",
               }}></Image>
-              <FavIcon />
+              {/* <FavIcon /> */}
             </div>
             <div className='food-name'>
               <h3> {foodItem.foodItem.label}</h3>
@@ -469,13 +575,13 @@ export default function Home() {
               <h3> </h3>
             </div>
             <div className='food-tags-container'>
-                <Tags/>
+              <Tags />
             </div>
           </div>
-        </div>
-      )
-    } catch (error) {
-      console.log(error)
+        )
+      } catch (error) {
+        console.log(error)
+      }
     }
   }
 
@@ -513,25 +619,18 @@ export default function Home() {
   const MainContent = () => {
     return (
       <>
-      <div className='billboard-container'>
-        <div className='billboard'>
-          <video playsInline autoPlay muted loop style={{
-            width:'100%',
-            height:'100%',
-            objectFit:'cover',
-            WebkitMaskImage: "-webkit-gradient(linear, left top, left bottom, from(rgba(0,0,0,1)), to(rgba(255, 251, 240,0)))"
-          }}>
-            <source src= {'/billboardVideo.mp4'}></source>
-          </video>
-        </div>
-      </div>
-        {/* <div className='section'>
-          <h1 className='section-header'> 
-            Top Picks
-          </h1>
-          <div className='food-container'>
+        <div className='billboard-container'>
+          <div className='billboard'>
+            <video playsInline autoPlay muted loop style={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+              WebkitMaskImage: "-webkit-gradient(linear, left top, left bottom, from(rgba(0,0,0,1)), to(rgba(255, 251, 240,0)))"
+            }}>
+              <source src={'/billboardVideo.mp4'}></source>
+            </video>
           </div>
-        </div> */}
+        </div>
         <div className='mainContent'>
           <div className='section'>
             <h1 className='section-header'>
@@ -614,25 +713,72 @@ export default function Home() {
     }
 
   }
+
   function handleForm(event: React.FormEvent<HTMLFormElement>): void {
     event.preventDefault()
-  }
-
-  function handleDragOver(event: any) {
-    event.preventDefault()
-  }
-
-  function handleDragEnter(event: any) {
-    event.preventDefault()
-    return (
-      <div style={{ cursor: 'copy' }}></div>
-    )
   }
 
   function handleSearch(event: React.FormEvent<HTMLInputElement>): void {
 
     var search = (event.target as HTMLTextAreaElement).value.toLowerCase();
     setSearchInput(search)
+  }
+
+
+  const Basket = () => {
+    let [showBasket, setShowBasket] = useState<boolean>(false)
+
+    function handleshowBasket(): void {
+      setShowBasket(true)
+    }
+
+    function handleHideBasket(): void {
+      setShowBasket(false)
+    }
+
+    // change from any!
+    let basket: any[] = []
+
+    if (typeof window !== 'undefined') {
+      for (var i = 0; i < sessionStorage.length; i++) {
+        const key = sessionStorage.key(i)
+        const value = sessionStorage.getItem(key!)
+        basket.push(value)
+        // console.log(basket)
+      }
+    }
+
+    function handleClearBasket(): void {
+      updateState({})
+      sessionStorage.clear()
+      basket = []
+    }
+
+    return (
+      <>
+        <div className='basket' onMouseEnter={() => handleshowBasket()} onMouseLeave={() => handleHideBasket()} ><Image className='basket' src='/basket.png' alt='calender icon' width={iconSize} height={iconSize} color='black'></Image>
+          {showBasket &&
+            <div className='drop-down-items-container'>
+              {/* change from any.... */}
+              {basket.map((item: any, index: number) => {
+                return (
+                  <div key={index}>
+                    <ul className='drop-down-items'>{item}</ul>
+                    <button onClick={() => { 
+
+                      basket = basket.filter(food => food !== `"`+item+`"`) 
+                      }}> X</button>
+                  </div>
+                )
+              })}
+              {basket.length !== 0 ? <button onClick={() => handleClearBasket()}> remove all</button> : <p> Add items to basket</p>}
+            </div>
+          }
+
+
+        </div>
+      </>
+    )
   }
 
   return (
@@ -647,7 +793,7 @@ export default function Home() {
             <input type='text' placeholder='Search for pancakes, tofu, steak flour...' onChange={(event) => handleSearch(event)}></input>
           </form>
           <div className='calender'><Image src='/calender.png' alt='calender icon' width={iconSize} height={iconSize} color='black'></Image></div>
-          <div className='basket' onDragEnter={(event) => handleDragEnter(event)} onDragOver={(event) => handleDragOver(event)}><Image className='basket' src='/basket.png' alt='calender icon' width={iconSize} height={iconSize} color='black'></Image></div>
+          <Basket />
         </div>
       </nav>
       <div>
@@ -656,3 +802,5 @@ export default function Home() {
     </main>
   )
 }
+
+
