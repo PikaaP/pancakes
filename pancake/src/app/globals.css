@@ -124,9 +124,31 @@ input[type=text] :focus {
   
 }
 
+.billboard-mask {
+  position: absolute;
+  top: 50%;
+  gap: 10px;
+}
 
-.mainContent {
-  margin-top: -20;
+.billboard-mask-name-icons {
+  display:flex;
+  gap: 10px;
+}
+
+.billboard-mask-tags-container {
+  margin-top: 5px;
+  display:flex;
+  gap: 10px;
+}
+
+.billboard-mask-tags-item {
+  border-radius: 21px;
+  background-color: #7F9DB0;
+  padding: 0.25em;
+}
+
+.main-content {
+  margin-top: 7.5%;
 }
 
 .section:first-of-type {

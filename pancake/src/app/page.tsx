@@ -1,11 +1,10 @@
 'use client';
 // typeof window === "undefined"
 
-import { StaticImageData, StaticImport } from 'next/dist/shared/lib/get-img-props';
 import Image from 'next/image'
-import React, { SetStateAction } from "react";
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import Link from 'next/link'
 
 const iconSize = 60
 var data = [
@@ -325,8 +324,9 @@ export default function Home() {
     if (serverData) {
       return (
         serverData[0]['breakfast'].map((item: any) => {
+          const newfoodItem = { ...item['recipe'], category: "breakfast" }
           return (
-            <FoodCard key={item['recipe'].calories} foodItem={item['recipe']} />
+            <FoodCard key={item['recipe'].calories} foodItem={newfoodItem} />
           )
         })
       )
@@ -343,8 +343,9 @@ export default function Home() {
     if (serverData) {
       return (
         serverData[0]['lunch'].map((item: any) => {
+          const newfoodItem = { ...item['recipe'], category: "lunch" }
           return (
-            <FoodCard key={item['recipe'].calories} foodItem={item['recipe']} />
+            <FoodCard key={item['recipe'].calories} foodItem={newfoodItem} />
           )
         })
       )
@@ -361,8 +362,9 @@ export default function Home() {
     if (serverData) {
       return (
         serverData[0]['dinner'].map((item: any) => {
+          const newfoodItem = { ...item['recipe'], category: "dinner" }
           return (
-            <FoodCard key={item['recipe'].calories} foodItem={item['recipe']} />
+            <FoodCard key={item['recipe'].calories} foodItem={newfoodItem} />
           )
         })
       )
@@ -379,8 +381,9 @@ export default function Home() {
     if (serverData) {
       return (
         serverData[0]['snacks'].map((item: any) => {
+          const newfoodItem = { ...item['recipe'], category: "snacks" }
           return (
-            <FoodCard key={item['recipe'].calories} foodItem={item['recipe']} />
+            <FoodCard key={item['recipe'].calories} foodItem={newfoodItem} />
           )
         })
       )
@@ -398,6 +401,7 @@ export default function Home() {
     let [likeStatus, setLikeStatus] = useState(false)
 
     let [timer, setTimer] = useState<boolean>(false)
+    let [basketStatus, setBasketStatus] = useState(false)
 
     let temptimer = false
 
@@ -423,13 +427,9 @@ export default function Home() {
 
     }
     const FavIcon = () => {
-
       const handleSetFav = (likeStatus: boolean) => {
         setLikeStatus(!likeStatus)
       }
-
-
-
       if (likeStatus === false) {
         return (
           <>
@@ -443,14 +443,16 @@ export default function Home() {
           onClick={() => handleSetFav(likeStatus)}></Image>
       )
     }
-    let [basketStatus, setBasketStatus] = useState(false)
 
     const BasketIcon = () => {
 
       if (typeof window !== 'undefined') {
         for (var i = 0; i < sessionStorage.length; i++) {
           const key = sessionStorage.key(i)
-          if (sessionStorage.getItem(key!) == `"` + foodItem.foodItem.label + `"`) {
+          const stringValue = sessionStorage.getItem(key!)
+          const value = JSON.parse(stringValue!)
+
+          if (value[0] == foodItem.foodItem.label) {
             useEffect(() => setBasketStatus(true), [])
           }
         }
@@ -458,7 +460,8 @@ export default function Home() {
 
       function handleAddBasket(cartItem: any): void {
         if (typeof window !== 'undefined') {
-          sessionStorage.setItem(cartItem.foodItem.label, JSON.stringify(cartItem.foodItem.label))
+
+          sessionStorage.setItem(cartItem.foodItem.label, JSON.stringify([cartItem.foodItem.label, cartItem.foodItem.category, cartItem.foodItem.calories]))
           for (var i = 0; i < sessionStorage.length; i++) {
             const key = sessionStorage.key(i)
           }
@@ -480,7 +483,7 @@ export default function Home() {
       }
 
       else return (
-        <button onClick={() => handleAddBasket(foodItem)}>Add to basket</button>
+        <button onClick={() => handleAddBasket(foodItem)}>Add to shopping list!</button>
       )
     }
 
@@ -489,12 +492,7 @@ export default function Home() {
     if (mouseEnter == true) {
 
 
-      function timeout(ms: number) {
-        return new Promise(resolve => setTimeout(resolve, ms));
-      }
       try {
-
-
         return (
           <div className='food-item-mouseEnter' key={foodItem.foodItem.calories} draggable={true}
             onMouseLeave={() => {
@@ -630,8 +628,22 @@ export default function Home() {
               <source src={'/billboardVideo.mp4'}></source>
             </video>
           </div>
+          <div className='billboard-mask'>
+            <div className='billboard-mask-name-icons'>
+              <h1 className='food-name'> Mask name</h1>
+              <button>Add to shopping List</button>
+              <button>Add to favs </button>
+
+              <button> more info!</button>
+            </div>
+            <div className='billboard-mask-tags-container'>
+              <h1 className='billboard-mask-tags-item'> tag1 </h1>
+              <h1 className='billboard-mask-tags-item'> tag2</h1>
+              <h1 className='billboard-mask-tags-item'> tag3</h1>
+            </div>
+          </div>
         </div>
-        <div className='mainContent'>
+        <div className='main-content'>
           <div className='section'>
             <h1 className='section-header'>
               Breakfast
@@ -727,6 +739,7 @@ export default function Home() {
 
   const Basket = () => {
     let [showBasket, setShowBasket] = useState<boolean>(false)
+    let [basketcontent, setBasketContent] = useState<any>()
 
     function handleshowBasket(): void {
       setShowBasket(true)
@@ -739,45 +752,48 @@ export default function Home() {
     // change from any!
     let basket: any[] = []
 
+
+
     if (typeof window !== 'undefined') {
       for (var i = 0; i < sessionStorage.length; i++) {
         const key = sessionStorage.key(i)
         const value = sessionStorage.getItem(key!)
-        basket.push(value)
-        // console.log(basket)
+        basket.push(JSON.parse(value!))
       }
     }
+
+
+
 
     function handleClearBasket(): void {
       updateState({})
       sessionStorage.clear()
-      basket = []
     }
 
     return (
       <>
-        <div className='basket' onMouseEnter={() => handleshowBasket()} onMouseLeave={() => handleHideBasket()} ><Image className='basket' src='/basket.png' alt='calender icon' width={iconSize} height={iconSize} color='black'></Image>
+
+        <div className='basket' onMouseEnter={() => handleshowBasket()} onMouseLeave={() => handleHideBasket()} >
+          <Link href="/checkout"><Image className='basket' src='/basket.png' alt='calender icon' width={iconSize} height={iconSize} color='black'></Image></Link>
           {showBasket &&
             <div className='drop-down-items-container'>
               {/* change from any.... */}
               {basket.map((item: any, index: number) => {
                 return (
-                  <div key={index}>
-                    <ul className='drop-down-items'>{item}</ul>
-                    <button onClick={() => { 
-
-                      basket = basket.filter(food => food !== `"`+item+`"`) 
-                      }}> X</button>
+                  <Link key={index} href="/checkout"><div key={index}>
+                    <ul className='drop-down-items' key={index}> {item[0]}</ul>
                   </div>
+                  </Link>
                 )
               })}
               {basket.length !== 0 ? <button onClick={() => handleClearBasket()}> remove all</button> : <p> Add items to basket</p>}
+
             </div>
           }
-
-
         </div>
       </>
+
+
     )
   }
 
