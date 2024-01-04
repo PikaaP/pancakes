@@ -1,302 +1,15 @@
 'use client';
-// typeof window === "undefined"
 
 import Image from 'next/image'
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import Link from 'next/link'
+import foodRepository, { FoodRepo } from '../../lib/food/repo/food.repository';
+import toast, { Toaster } from 'react-hot-toast';
+
 
 const iconSize = 60
-var data = [
-  {
-    "name": "Trina",
-    "index": 0,
-    "details": 20,
-    "src": "/pancake.png",
-    "tags": [
-      "dolor",
-      "ea",
-      "aute",
-      "tempor"
-    ],
-    "friends": [
-      {
-        "id": 0,
-        "name": "Santana Winters"
-      },
-      {
-        "id": 1,
-        "name": "Bertha Horn"
-      },
-      {
-        "id": 2,
-        "name": "Deanna Evans"
-      }
-    ]
-  },
-  {
-    "name": "Trina",
-    "index": 1,
-    "details": 20,
-    "src": "/pancake.png",
-    "tags": [
-      "dolor",
-      "ea",
-      "aute",
-      "tempor"
-    ],
-    "friends": [
-      {
-        "id": 0,
-        "name": "Santana Winters"
-      },
-      {
-        "id": 1,
-        "name": "Bertha Horn"
-      },
-      {
-        "id": 2,
-        "name": "Deanna Evans"
-      }
-    ]
-  },
-  {
-    "name": "Trina",
-    "index": 2,
-    "details": 20,
-    "src": "/pancake.png",
-    "tags": [
-      "dolor",
-      "ea",
-      "aute",
-      "tempor"
-    ],
-    "friends": [
-      {
-        "id": 0,
-        "name": "Santana Winters"
-      },
-      {
-        "id": 1,
-        "name": "Bertha Horn"
-      },
-      {
-        "id": 2,
-        "name": "Deanna Evans"
-      }
-    ]
-  },
-  {
-    "name": "Trina",
-    "index": 3,
-    "details": 20,
-    "src": "/pancake.png",
-    "tags": [
-      "dolor",
-      "ea",
-      "aute",
-      "tempor"
-    ],
-    "friends": [
-      {
-        "id": 0,
-        "name": "Santana Winters"
-      },
-      {
-        "id": 1,
-        "name": "Bertha Horn"
-      },
-      {
-        "id": 2,
-        "name": "Deanna Evans"
-      }
-    ]
-  },
-  {
-    "name": "Trina",
-    "index": 4,
-    "details": 20,
-    "src": "/pancake.png",
-    "tags": [
-      "dolor",
-      "ea",
-      "aute",
-      "tempor"
-    ],
-    "friends": [
-      {
-        "id": 0,
-        "name": "Santana Winters"
-      },
-      {
-        "id": 1,
-        "name": "Bertha Horn"
-      },
-      {
-        "id": 2,
-        "name": "Deanna Evans"
-      }
-    ]
-  },
-  {
-    "name": "Trina",
-    "index": 5,
-    "details": 20,
-    "src": "/pancake.png",
-    "tags": [
-      "dolor",
-      "ea",
-      "aute",
-      "tempor"
-    ],
-    "friends": [
-      {
-        "id": 0,
-        "name": "Santana Winters"
-      },
-      {
-        "id": 1,
-        "name": "Bertha Horn"
-      },
-      {
-        "id": 2,
-        "name": "Deanna Evans"
-      }
-    ]
-  },
-  {
-    "name": "Bishop",
-    "index": 6,
-    "details": 32,
-    "src": "/pancake.png",
-    "tags": [
-      "sit",
-      "nisi",
-      "laborum",
-      "labore"
-    ],
-    "friends": [
-      {
-        "id": 0,
-        "name": "Wagner Lawson"
-      },
-      {
-        "id": 1,
-        "name": "Julia Benton"
-      },
-      {
-        "id": 2,
-        "name": "Carey Farley"
-      }
-    ]
-  },
-  {
-    "name": "Erika",
-    "index": 7,
-    "details": 28,
-    "src": "/pancake.png",
-    "tags": [
-      "aliqua",
-      "magna",
-      "nulla",
-      "in"
-    ],
-    "friends": [
-      {
-        "id": 0,
-        "name": "Watts Hensley"
-      },
-      {
-        "id": 1,
-        "name": "Sally Bates"
-      },
-      {
-        "id": 2,
-        "name": "Young Buckley"
-      }
-    ]
-  },
-  {
-    "name": "Sasha",
-    "index": 8,
-    "details": 40,
-    "src": "/pancake.png",
-    "tags": [
-      "elit",
-      "reprehenderit",
-      "aliqua",
-      "nostrud"
-    ],
-    "friends": [
-      {
-        "id": 0,
-        "name": "Travis Knapp"
-      },
-      {
-        "id": 1,
-        "name": "Edwina Meadows"
-      },
-      {
-        "id": 2,
-        "name": "Britney Baxter"
-      }
-    ]
-  },
-  {
-    "name": "Mccullough",
-    "index": 9,
-    "details": 38,
-    "src": "/pancake.png",
-    "tags": [
-      "eu",
-      "incididunt",
-      "et",
-      "do"
-    ],
-    "friends": [
-      {
-        "id": 0,
-        "name": "Mabel Rosales"
-      },
-      {
-        "id": 1,
-        "name": "Jeanette Diaz"
-      },
-      {
-        "id": 2,
-        "name": "Chris Bird"
-      }
-    ]
-  },
-  {
-    "name": "Mcintyre",
-    "index": 10,
-    "details": 28,
-    "src": "/pancake.png",
-    "tags": [
-      "officia",
-      "anim",
-      "officia",
-      "minim"
-    ],
-    "friends": [
-      {
-        "id": 0,
-        "name": "Price Vincent"
-      },
-      {
-        "id": 1,
-        "name": "Anita Medina"
-      },
-      {
-        "id": 2,
-        "name": "Elisabeth Bradford"
-      }
-    ]
-  }
-]
-
-
+var data = [{}]
 
 
 export default function Home() {
@@ -305,18 +18,14 @@ export default function Home() {
   let [serverData, setServerData] = useState<any>()
 
   const [state, updateState] = useState<any>();
-  // const forceUpdate = React.useCallback(() => updateState({}), []);
 
   useEffect(
     () => {
-      axios.get(`http://localhost:3001/all`)
-        .then((res) => {
-          var responseData = res.data
-          setServerData(responseData)
-        }).catch((err: Error) => {
-          console.log(err)
-        })
-
+      async function getFood() {
+        const food = await foodRepository.getAll();
+        setServerData(food)
+      }
+      getFood()
     }, []
   )
 
@@ -460,7 +169,7 @@ export default function Home() {
 
       function handleAddBasket(cartItem: any): void {
         if (typeof window !== 'undefined') {
-
+          toast.success(`Added ${cartItem.foodItem.label} to shopping list.`, {position: 'top-center'})
           sessionStorage.setItem(cartItem.foodItem.label, JSON.stringify([cartItem.foodItem.label, cartItem.foodItem.category, cartItem.foodItem.calories]))
           for (var i = 0; i < sessionStorage.length; i++) {
             const key = sessionStorage.key(i)
@@ -471,6 +180,9 @@ export default function Home() {
 
       function handleRemoveasket(cartItem: any): void {
         if (typeof window !== 'undefined') {
+          toast.error(`Removed ${cartItem.foodItem.label} from shopping list.`, {
+          position: 'top-center',
+        })
           sessionStorage.removeItem(cartItem.foodItem.label);
           setBasketStatus(false)
         }
@@ -682,7 +394,7 @@ export default function Home() {
   }
 
   const ViewPortContent = () => {
-    // would like to change from any
+
     const SearchContent = (item: any) => {
       return (
         <>
@@ -707,9 +419,9 @@ export default function Home() {
     }
 
     if (searchInput !== '') {
-      const nameHolder: { name: string; index: number; details: number; src: string; tags: string[]; friends: { id: number; name: string; }[]; }[] = []
+      const nameHolder: {  }[] = []
       data.forEach((element) => {
-        if (element.name.toLowerCase().includes(searchInput.toLowerCase())) {
+        if (element) {
           nameHolder.push(element)
         }
       })

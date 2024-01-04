@@ -32,16 +32,14 @@ const Checkout = () => {
                         for (var j = 0; j < data.length; j++) {
                             if (data[j]['recipe'].label == name && data[j]['recipe'].calories == calories) {
                                 tempBasket.push(
-                                    [{ item: data[j]['recipe'].label }]
+                                    [{ item: data[j]['recipe'] }]
                                 )
                             }
                         }
                     })
-                    .then(() =>  setUserbasket(tempBasket))
+                    .then(() => setUserbasket(tempBasket))
             }
-           
-        },
-        []
+        },[]
     )
 
     const BasketViewPort = () => {
@@ -53,7 +51,15 @@ const Checkout = () => {
         }
         else {
             return (
-                <p>data is here now :c</p>
+                userBasket.map((element: any) => {
+                    console.log(element[0].item)
+                    return (
+                        <div className='basket-viewport-content' key={element[0].item.label}>
+                            <p> {element[0].item.label} </p>
+                        </div>
+
+                    )
+                })
             )
         }
     }
@@ -67,7 +73,7 @@ const Checkout = () => {
                     console.log(value)
                 }
             }}> X</button>
-            <div>
+            <div className=''>
                 <BasketViewPort />
             </div>
         </div>
