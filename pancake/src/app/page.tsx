@@ -6,6 +6,7 @@ import axios from 'axios';
 import Link from 'next/link'
 import foodRepository, { FoodRepo } from '../../lib/food/repo/food.repository';
 import toast, { Toaster } from 'react-hot-toast';
+import { list } from 'postcss';
 
 
 const iconSize = 60
@@ -139,33 +140,35 @@ export default function Home() {
 
       const handleSetFav = (likeStatus: boolean) => {
         if (typeof window !== 'undefined') {
-          if(sessionStorage.getItem('fav') !== null) {
-            const stringValue = sessionStorage.getItem('fav')
-            const value = JSON.parse(stringValue!)
-            let favList = [...value, foodItem.foodItem.label]
-            sessionStorage.setItem('fav', JSON.stringify(favList))
+          try {
+            if (sessionStorage.getItem('fav') !== null) {
+              const stringValue = sessionStorage.getItem('fav')
+              const value = JSON.parse(stringValue!)
+              let favList = [...value, foodItem.foodItem.label]
+              sessionStorage.setItem('fav', JSON.stringify(favList))
+            }
+
+            else {
+              sessionStorage.setItem('fav', JSON.stringify([foodItem.foodItem.label]))
+            }
+            setLikeStatus(!likeStatus)
+          } catch (error) {
+            toast.error('Favourite list is full :c');
           }
-          
-        else {
-          sessionStorage.setItem('fav', JSON.stringify([foodItem.foodItem.label]))
-          const stringValue = sessionStorage.getItem('fav')
-          const value = JSON.parse(stringValue!)
-        }
-        setLikeStatus(!likeStatus)
         }
       }
 
       const handleRemoveFav = (likeStatus: boolean) => {
         if (typeof window !== 'undefined') {
-            const stringValue = sessionStorage.getItem('fav')
-            const value = JSON.parse(stringValue!)
-            const index = value.indexOf(foodItem.foodItem.label)
-            if (index > -1) {
-              value.splice(index, 1)
-              let newFavList = value
-              sessionStorage.setItem('fav', JSON.stringify(newFavList))
-              setLikeStatus(!likeStatus)
-            } 
+          const stringValue = sessionStorage.getItem('fav')
+          const value = JSON.parse(stringValue!)
+          const index = value.indexOf(foodItem.foodItem.label)
+          if (index > -1) {
+            value.splice(index, 1)
+            let newFavList = value
+            sessionStorage.setItem('fav', JSON.stringify(newFavList))
+            setLikeStatus(!likeStatus)
+          }
         }
       }
 
@@ -173,94 +176,97 @@ export default function Home() {
         if (sessionStorage.getItem('fav') !== null) {
           const stringValue = sessionStorage.getItem('fav')
           const value = JSON.parse(stringValue!)
-          if (value.find((element: string)=> element == foodItem.foodItem.label)){
-             return (
+          if (value.find((element: string) => element == foodItem.foodItem.label)) {
+            return (
               <Image draggable={false} className='filled-heart' src='/filledHeartIcon.png' alt='filled fav icon' width={40} height={40}
                 onClick={() => handleRemoveFav(likeStatus)}></Image>
             )
           }
           else return (
             <>
-            <Image draggable={false} className='heart' src='/heartIcon.png' alt='fav icon' width={40} height={40}
-              onClick={() => handleSetFav(likeStatus)}></Image>
-          </>
+              <Image draggable={false} className='heart' src='/heartIcon.png' alt='fav icon' width={40} height={40}
+                onClick={() => handleSetFav(likeStatus)}></Image>
+            </>
           )
         }
         else {
           return (
             <>
-            <Image draggable={false} className='heart' src='/heartIcon.png' alt='fav icon' width={40} height={40}
-              onClick={() => handleSetFav(likeStatus)}></Image>
-          </>
+              <Image draggable={false} className='heart' src='/heartIcon.png' alt='fav icon' width={40} height={40}
+                onClick={() => handleSetFav(likeStatus)}></Image>
+            </>
           )
         }
       }
-
-      // if (likeStatus === false) {
-      //   return (
-      //     <>
-      //       <Image draggable={false} className='heart' src='/heartIcon.png' alt='fav icon' width={40} height={40}
-      //         onClick={() => handleSetFav(likeStatus)}></Image>
-      //     </>
-      //   )
-      // }
-      // else return (
-      //   <Image draggable={false} className='filled-heart' src='/filledHeartIcon.png' alt='filled fav icon' width={40} height={40}
-      //     onClick={() => handleRemoveFav(likeStatus)}></Image>
-      // )
     }
 
     const BasketIcon = () => {
 
-      if (typeof window !== 'undefined') {
-        for (var i = 0; i < sessionStorage.length; i++) {
-          const key = sessionStorage.key(i)
-          const stringValue = sessionStorage.getItem(key!)
-          const value = JSON.parse(stringValue!)
-
-          if (value[0] == foodItem.foodItem.label) {
-            useEffect(() => setBasketStatus(true), [])
-          }
-        }
-      }
-
-      function handleAddBasket(cartItem: any): void {
+      function handleAddBasket(): void {
         if (typeof window !== 'undefined') {
-          toast.success(`Added ${cartItem.foodItem.label} to shopping list.`, {position: 'top-center'})
-          sessionStorage.setItem(cartItem.foodItem.label, JSON.stringify([cartItem.foodItem.label, cartItem.foodItem.category, cartItem.foodItem.calories]))
-          for (var i = 0; i < sessionStorage.length; i++) {
-            const key = sessionStorage.key(i)
+          if (sessionStorage.getItem('basket') !== null) {
+            const stringValue = sessionStorage.getItem('basket')
+            const value = JSON.parse(stringValue!)
+            let basketList = [...value, [foodItem.foodItem.label, foodItem.foodItem.category, foodItem.foodItem.calories]]
+            sessionStorage.setItem('basket', JSON.stringify(basketList))
+          }
+          else {
+            sessionStorage.setItem('basket', JSON.stringify([[foodItem.foodItem.label, foodItem.foodItem.category, foodItem.foodItem.calories]]))
           }
           setBasketStatus(true)
+          toast.success(`Added ${foodItem.foodItem.label} to shopping list.`, { position: 'top-center' })
         }
       }
 
-      function handleRemoveasket(cartItem: any): void {
+      function handleRemoveasket(): void {
+
         if (typeof window !== 'undefined') {
-          toast.error(`Removed ${cartItem.foodItem.label} from shopping list.`, {
-          position: 'top-center',
-        })
-          sessionStorage.removeItem(cartItem.foodItem.label);
+          const stringValue = sessionStorage.getItem('basket')
+          const value = JSON.parse(stringValue!)
+          let index
+          for (var i = 0; i < value.length; i++) {
+            if (value[i][0] == foodItem.foodItem.label && value[i][1] == foodItem.foodItem.category) {
+              index = i
+            }
+          }
+          value.splice(index, 1)
+          let newBasketList = value
+          sessionStorage.setItem('basket', JSON.stringify(newBasketList))
           setBasketStatus(false)
+          toast.error(`Removed ${foodItem.foodItem.label} from shopping list.`, {
+            position: 'top-center',
+          })
         }
       }
 
-      if (basketStatus) {
-        return (
-          <button onClick={() => handleRemoveasket(foodItem)}>Remove</button>
-        )
-      }
+      if (typeof window !== 'undefined') {
+        if (sessionStorage.getItem('basket') !== null) {
+          const stringValue = sessionStorage.getItem('basket')
+          const value = JSON.parse(stringValue!)
+          let test = value.filter((element: any) => element[0] == foodItem.foodItem.name)
+          if (value.find((element: Array<string | number>) => element[0] == foodItem.foodItem.label)) {
+            return (
+              <button onClick={() => handleRemoveasket()}>Remove</button>
+            )
+          }
+          else {
+            return (
+              <button onClick={() => handleAddBasket()}>Add to shopping list!</button>
+            )
+          }
+        }
+        else {
+          return (
+            <button onClick={() => handleAddBasket()}>Add to shopping list!</button>
+          )
+        }
 
-      else return (
-        <button onClick={() => handleAddBasket(foodItem)}>Add to shopping list!</button>
-      )
+      }
     }
 
 
 
     if (mouseEnter == true) {
-
-
       try {
         return (
           <div className='food-item-mouseEnter' key={foodItem.foodItem.calories} draggable={true}
@@ -476,7 +482,7 @@ export default function Home() {
     }
 
     if (searchInput !== '') {
-      const nameHolder: {  }[] = []
+      const nameHolder: {}[] = []
       data.forEach((element) => {
         if (element) {
           nameHolder.push(element)
@@ -508,7 +514,6 @@ export default function Home() {
 
   const Basket = () => {
     let [showBasket, setShowBasket] = useState<boolean>(false)
-    let [basketcontent, setBasketContent] = useState<any>()
 
     function handleshowBasket(): void {
       setShowBasket(true)
@@ -518,35 +523,29 @@ export default function Home() {
       setShowBasket(false)
     }
 
-    // change from any!
-    let basket: any[] = []
-
-
+    let basket: string[] = []
 
     if (typeof window !== 'undefined') {
-      for (var i = 0; i < sessionStorage.length; i++) {
-        const key = sessionStorage.key(i)
-        const value = sessionStorage.getItem(key!)
-        basket.push(JSON.parse(value!))
-      }
+      const stringValue = sessionStorage.getItem('basket')
+      const value = JSON.parse(stringValue!)
+      if (value !== null)
+        value.forEach((element: any) => {
+          basket.push(element)
+        });
+
     }
-
-
-
 
     function handleClearBasket(): void {
       updateState({})
-      sessionStorage.clear()
+      sessionStorage.removeItem('basket')
     }
 
     return (
       <>
-
         <div className='basket' onMouseEnter={() => handleshowBasket()} onMouseLeave={() => handleHideBasket()} >
           <Link href="/checkout"><Image className='basket' src='/basket.png' alt='calender icon' width={iconSize} height={iconSize} color='black'></Image></Link>
           {showBasket &&
             <div className='drop-down-items-container'>
-              {/* change from any.... */}
               {basket.map((item: any, index: number) => {
                 return (
                   <Link key={index} href="/checkout"><div key={index}>
@@ -556,7 +555,6 @@ export default function Home() {
                 )
               })}
               {basket.length !== 0 ? <button onClick={() => handleClearBasket()}> remove all</button> : <p> Add items to basket</p>}
-
             </div>
           }
         </div>
