@@ -15,9 +15,9 @@ var data = [{}]
 export default function Home() {
 
   const [searchInput, setSearchInput] = useState(String)
-  let [serverData, setServerData] = useState<any>()
-
+  const [serverData, setServerData] = useState<any>()
   const [state, updateState] = useState<any>();
+
 
   useEffect(
     () => {
@@ -136,21 +136,78 @@ export default function Home() {
 
     }
     const FavIcon = () => {
+
       const handleSetFav = (likeStatus: boolean) => {
+        if (typeof window !== 'undefined') {
+          if(sessionStorage.getItem('fav') !== null) {
+            const stringValue = sessionStorage.getItem('fav')
+            const value = JSON.parse(stringValue!)
+            let favList = [...value, foodItem.foodItem.label]
+            sessionStorage.setItem('fav', JSON.stringify(favList))
+          }
+          
+        else {
+          sessionStorage.setItem('fav', JSON.stringify([foodItem.foodItem.label]))
+          const stringValue = sessionStorage.getItem('fav')
+          const value = JSON.parse(stringValue!)
+        }
         setLikeStatus(!likeStatus)
+        }
       }
-      if (likeStatus === false) {
-        return (
-          <>
+
+      const handleRemoveFav = (likeStatus: boolean) => {
+        if (typeof window !== 'undefined') {
+            const stringValue = sessionStorage.getItem('fav')
+            const value = JSON.parse(stringValue!)
+            const index = value.indexOf(foodItem.foodItem.label)
+            if (index > -1) {
+              value.splice(index, 1)
+              let newFavList = value
+              sessionStorage.setItem('fav', JSON.stringify(newFavList))
+              setLikeStatus(!likeStatus)
+            } 
+        }
+      }
+
+      if (typeof window !== 'undefined') {
+        if (sessionStorage.getItem('fav') !== null) {
+          const stringValue = sessionStorage.getItem('fav')
+          const value = JSON.parse(stringValue!)
+          if (value.find((element: string)=> element == foodItem.foodItem.label)){
+             return (
+              <Image draggable={false} className='filled-heart' src='/filledHeartIcon.png' alt='filled fav icon' width={40} height={40}
+                onClick={() => handleRemoveFav(likeStatus)}></Image>
+            )
+          }
+          else return (
+            <>
             <Image draggable={false} className='heart' src='/heartIcon.png' alt='fav icon' width={40} height={40}
               onClick={() => handleSetFav(likeStatus)}></Image>
           </>
-        )
+          )
+        }
+        else {
+          return (
+            <>
+            <Image draggable={false} className='heart' src='/heartIcon.png' alt='fav icon' width={40} height={40}
+              onClick={() => handleSetFav(likeStatus)}></Image>
+          </>
+          )
+        }
       }
-      else return (
-        <Image draggable={false} className='filled-heart' src='/filledHeartIcon.png' alt='filled fav icon' width={40} height={40}
-          onClick={() => handleSetFav(likeStatus)}></Image>
-      )
+
+      // if (likeStatus === false) {
+      //   return (
+      //     <>
+      //       <Image draggable={false} className='heart' src='/heartIcon.png' alt='fav icon' width={40} height={40}
+      //         onClick={() => handleSetFav(likeStatus)}></Image>
+      //     </>
+      //   )
+      // }
+      // else return (
+      //   <Image draggable={false} className='filled-heart' src='/filledHeartIcon.png' alt='filled fav icon' width={40} height={40}
+      //     onClick={() => handleRemoveFav(likeStatus)}></Image>
+      // )
     }
 
     const BasketIcon = () => {

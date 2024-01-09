@@ -18,7 +18,21 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>{children}
-      <Toaster />
+        <Toaster
+          toastOptions={{
+            success: {
+              style: {
+                background: '#FFFFFF',
+                
+              },
+            },
+            error: {
+              style: {
+                background: '#FFFFFF',
+              },
+            },
+          }}
+        />
       </body>
     </html>
   )
