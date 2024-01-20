@@ -17,11 +17,11 @@ const Checkout = () => {
             let basketData: any[] = []
             let tempBasket: any[] = []
 
-            for (var i = 0; i < sessionStorage.length; i++) {
-                const key = sessionStorage.key(i)
-                const value = sessionStorage.getItem(key!)
-                basketData.push(JSON.parse(value!))
+            if (sessionStorage.getItem('basket') !== null) {
+                const stringValue = sessionStorage.getItem('basket')
+                basketData = JSON.parse(stringValue!)
             }
+
             for (var i = 0; i < basketData.length; i++) {
                 const name = basketData[i][0]
                 const type = basketData[i][1]
@@ -39,20 +39,19 @@ const Checkout = () => {
                     })
                     .then(() => setUserbasket(tempBasket))
             }
-        },[]
+        }, []
     )
 
     const BasketViewPort = () => {
 
         if (userBasket.length == 0) {
             return (
-                <p>nope</p>
+                <p>Basket is empty</p>
             )
         }
         else {
             return (
                 userBasket.map((element: any) => {
-                    console.log(element[0].item)
                     return (
                         <div className='basket-viewport-content' key={element[0].item.label}>
                             <p> {element[0].item.label} </p>
@@ -67,12 +66,8 @@ const Checkout = () => {
     return (
         <div>
             <button onClick={() => {
-                for (var i = 0; i < sessionStorage.length; i++) {
-                    const key = sessionStorage.key(i)
-                    const value = sessionStorage.getItem(key!)
-                    console.log(value)
-                }
-            }}> X</button>
+                console.log(sessionStorage.getItem('basket'))
+            }}> (temp log basket)</button>
             <div className=''>
                 <BasketViewPort />
             </div>

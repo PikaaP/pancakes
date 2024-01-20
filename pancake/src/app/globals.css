@@ -178,42 +178,40 @@ input[type=text] :focus {
   gap: 30px;
   overflow-x: auto;
   filter: drop-shadow(black 1px 1px 1px);
-  height:
+  height: auto;
 }
+
 
 .food-container::-webkit-scrollbar{
   display: none;
 }
-
-.food-item {
+.food-item-preview{
   flex-shrink: 0;
   max-width: 220px;
   border: 1px solid rgba(255,255,255,.0);
   animation: fadeInAnimation ease .75s;
-  /* animation-iteration-count: 1; */
 }
 
-
-.food-item-mouseEnter {
+.food-item {
   flex-shrink: 0;
-  max-width: 220px;
+  width: 220px;
   height: min-content;
   border: 1px solid rgba(255,255,255,.0);
-  /* animation: fadeInAnimation ease 0.5s; */
-  /* animation-iteration-count: 1;
-  transition: max-width 1s; */
+  animation: fadeInAnimation ease .75s;
+  transition-duration: .5s;
 }
 
-.food-item-mouseEnter:last-child {
-  margin-right: 30px;
+.food-item-expanded{
+  flex-shrink: 0;
+  width: 380px;
+  height: min-content;
+  border: 1px solid rgba(255,255,255,.0);
+  animation: fadeInAnimation ease .75s;
+  transition-duration: .5s;
 }
 
-.food-item-mouseEnter:hover {
-  max-width: 320px;
-}
-
-.food-item-mouseEnter:not(:hover) {
-  max-width: 220px;
+.food-item-expanded:hover{
+  transition-delay: .55s;
 }
 
 .food-item:last-child {
@@ -222,7 +220,7 @@ input[type=text] :focus {
 
 .food-item:hover{
   border: black solid 1px;
-  border-radius: 12px;
+  border-radius: 12px;    
   background: linear-gradient(#FFFBF0, #D0D6C8)
 }
 
@@ -253,8 +251,6 @@ input[type=text] :focus {
   background-color: #7F9DB0;
   padding: 0.25em;
 }
-
-
 
 
 .heart:hover {

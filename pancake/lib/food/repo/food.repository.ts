@@ -3,7 +3,6 @@ import { AxiosInstance } from "axios";
 import axiosInstance from "../../http/client/axios.client";
 
 type IFoodRepo = {
-    // add types
     getAll: () => Promise<object>;
     getByType: (type: string) => Promise<object>;
 }
