@@ -211,7 +211,7 @@ input[type=text] :focus {
 }
 
 .food-item-expanded:hover{
-  transition-delay: .55s;
+  transition-delay: .30s;
 }
 
 .food-item:last-child {
