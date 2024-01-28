@@ -19,17 +19,21 @@ import DialogTitle from '@mui/material/DialogTitle';
 
 import AsyncSelect from 'react-select/async';
 import { ColourOption, colourOptions } from '../../data';
-import { StylesConfig } from 'react-select';
+import { ActionMeta, MultiValue, StylesConfig } from 'react-select';
 
 import chroma from "chroma-js"
+var pluralize = require('pluralize')
+
 
 const iconSize = 60
-var data = [{}]
+
 
 
 export default function Home() {
 
   const [searchInput, setSearchInput] = useState(String)
+  const [searchInput2, setSearchInput2] = useState<any>([])
+
   const [serverData, setServerData] = useState<any>()
   const [state, updateState] = useState<any>();
 
@@ -38,7 +42,7 @@ export default function Home() {
     () => {
       async function getFood() {
         const food: any = await foodRepository.getAll();
-        
+
         const healthlabelslist: any[] = []
         const ingredientslist: any[] = []
         const tagsList: any[] = []
@@ -48,16 +52,16 @@ export default function Home() {
             (element: any) => {
 
               element.recipe.healthLabels.forEach(function (entry: any) {
-                healthlabelslist.push(entry)
+                healthlabelslist.push(entry.toLowerCase())
               })
 
               element.recipe.ingredients.map((elements: any) => { return elements.food }).forEach(function (entry: any) {
-                ingredientslist.push(entry)
+                ingredientslist.push(entry.toLowerCase())
               })
 
               if (element.recipe.tags) {
                 element.recipe.tags.forEach(function (entry: any) {
-                  tagsList.push(entry)
+                  tagsList.push(entry.toLowerCase())
                 })
               }
 
@@ -65,6 +69,7 @@ export default function Home() {
             }
           )
         }
+
         const uniqHealthlabelslist = [...new Set(healthlabelslist)];
         const uniqingredientslist = [...new Set(ingredientslist)];
         const uniqtagsList = [...new Set(tagsList)];
@@ -72,18 +77,21 @@ export default function Home() {
 
         var newArray = uniqingredientslist.concat(uniqtagsList);
         var newArray2 = newArray.concat(uniqHealthlabelslist);
+        var uniqArray = [...new Set(newArray2)]
 
-        newArray2.forEach((element: any, index: number) => {
+        var uniqArraySingle = uniqArray.map((item: any) => pluralize.singular(item))
+
+        uniqArraySingle.forEach((element: any, index: number) => {
           dataList.push(
             {
-              value: element.toLowerCase(),
+              value: element,
               label: element,
               color: "#" + Math.floor(Math.random() * 16777215).toString(16)
             }
           )
         })
 
-        console.log(dataList)
+        // console.log(dataList)
         setServerData(food)
       }
       getFood()
@@ -165,8 +173,6 @@ export default function Home() {
     }
 
   }
-
-
 
   const FoodCard = (foodItem: any) => {
     let [likeStatus, setLikeStatus] = useState<boolean>(false)
@@ -536,9 +542,6 @@ export default function Home() {
     }
   }
 
-
-
-
   const FoodCardPreview = () => {
 
     const n = Math.round(1920 / 300)
@@ -639,17 +642,18 @@ export default function Home() {
 
   const ViewPortContent = () => {
 
-    const SearchContent = (item: any) => {
+    const SearchContent = () => {
       const matches: Record<string, any> = {}
 
-      const BreakfastSearch = () => {
+      const SearchResults = (category: any) => {
+
         const [foodData, setFoodData] = useState<any>()
         const searchResult: Object[] = []
 
 
         useEffect(() => {
           async function getFood() {
-            const food = await foodRepository.getByType('Breakfast')
+            const food = await foodRepository.getByType(category.category)
             setFoodData(food)
           }
           getFood()
@@ -664,6 +668,7 @@ export default function Home() {
         else {
           foodData.forEach((element: any) => {
             const item = element['recipe']
+
             let matchCount: any = {
               tagList: [],
               ingredientList: [],
@@ -672,24 +677,35 @@ export default function Home() {
             let result = false
 
             if (item.tags) {
+              for (var i = 0; i < searchInput2.length; i++) {
+                if (item.tags.some((r: string) => r.toLowerCase().includes(searchInput2[i].label.toLowerCase()))) {
+                  matchCount.tagList.push(searchInput2[i])
+                  matchCount.type = category.category
+                  result = true
+                }
+              }
+            }
 
-              for (var i = 0; i < searchInput.split(' ').length; i++) {
-                if (item.tags.some((r: string) => r.toLowerCase().includes(searchInput.split(' ')[i].toLowerCase())) && searchInput.split(' ')[i] !== '') {
-                  matchCount.tagList.push(searchInput.split(' ')[i])
-                  matchCount.type = 'breakfast'
+            if (item.healthLabels) {
+              for (var i = 0; i < searchInput2.length; i++) {
+                if (item.healthLabels.some((r: string) => r.toLowerCase().includes(searchInput2[i].label.toLowerCase()))) {
+                  matchCount.tagList.push(searchInput2[i])
+                  matchCount.type = category.category
                   result = true
                 }
               }
             }
 
             let ingredientList = item.ingredients.map((element: any) => element.food)
-            for (var i = 0; i < searchInput.split(' ').length; i++) {
-              if (ingredientList.some((r: string) => r.toLowerCase().includes(searchInput.split(' ')[i].toLowerCase())) && searchInput.split(' ')[i] !== '') {
-                matchCount.ingredientList.push(searchInput.split(' ')[i])
-                matchCount.type = 'breakfast'
+            for (var i = 0; i < searchInput2.length; i++) {
+              if (ingredientList.some((r: string) => r.toLowerCase().includes(searchInput2[i].label.toLowerCase()))) {
+                matchCount.ingredientList.push(searchInput2[i])
+                matchCount.type = category.category
                 result = true
+                // console.log(item.label, searchInput2[i].label, ingredientList)
               }
             }
+
 
             if (result) {
               searchResult.push(item)
@@ -697,18 +713,21 @@ export default function Home() {
             }
           }
           )
-
-          console.log(matches)
           return (
             <>
-              <h1 className='section-header'>
-                Breakfast {searchResult.length}
-              </h1>Ï
-              {searchResult.map((element: any) => {
-                return (
-                  <p>{element.label}</p>
-                )
-              })}
+              <div className='section'>
+                <h1 className='section-header'>
+
+                  {category.category} {searchResult.length}
+                </h1>Ï
+                <div className='food-container'>
+                  {searchResult.map((element: any) => {
+                    return (
+                      <p>{element.label}</p>
+                    )
+                  })}
+                </div>
+              </div>
             </>
           )
         }
@@ -717,43 +736,18 @@ export default function Home() {
       return (
         <>
           <div className='search-section'>
-            <h3 className='section-header'>Found {item.item.length} results for {searchInput}</h3>
-            <div className='search-container' key={item.item.name}>
+            <h3 className='section-header'>Found X results for X</h3>
+            <div className='search-container'>
               <div className='main-content'>
                 <div className='section'>
                   <div className='food-container'>
                     <h3>Top Results</h3>
                   </div>
                 </div>
-                <div className='section'>
-                  <div className='food-container'>
-                    <BreakfastSearch />
-                  </div>
-                </div>
-                <div className='section'>
-                  <h1 className='section-header'>
-                    Lunch
-                  </h1>
-                  <div className='food-container'>
-                    {/* <Lunch /> */}
-                  </div>
-                </div>
-                <div className='section'>
-                  <h1 className='section-header'>
-                    Dinner
-                  </h1>
-                  <div className='food-container'>
-                    {/* <Dinner /> */}
-                  </div>
-                </div>
-                <div className='section'>
-                  <h1 className='section-header'>
-                    Snacks
-                  </h1>
-                  <div className='food-container'>
-                    {/* <Snacks /> */}
-                  </div>
-                </div>
+                <SearchResults category='Breakfast' />
+                <SearchResults category='Lunch' />
+                <SearchResults category='Dinner' />
+                <SearchResults category='Snacks' />
               </div>
             </div>
           </div>
@@ -761,15 +755,9 @@ export default function Home() {
       )
     }
 
-    if (searchInput !== '') {
-      const nameHolder: {}[] = []
-      data.forEach((element) => {
-        if (element) {
-          nameHolder.push(element)
-        }
-      })
+    if (searchInput2.length !== 0) {
       return (
-        <><SearchContent item={nameHolder} /></>
+        <><SearchContent/></>
       )
     }
 
@@ -859,61 +847,6 @@ export default function Home() {
     setSearchInput(search)
   }
 
-  const SearchBar = () => {
-
-    const [inputValue, setInputValue] = useState<any>([''])
-
-    function handleChange(event: ChangeEvent<HTMLInputElement>): void {
-
-
-      const { maxLength, value, name } = event.target
-
-      const [fieldName, fieldIndex] = name.split("-")
-
-      let fieldIntIndex = parseInt(fieldIndex, 10)
-
-
-      if (value.length >= maxLength) {
-
-        setInputValue([...inputValue, event.target.value])
-        console.log(inputValue)
-
-        setTimeout(
-          () => {
-            const nextfield: any = document.querySelector(
-              `input[name=input-${fieldIntIndex + 1}]`
-            );
-
-            if (nextfield !== null) {
-              console.log('going next')
-              nextfield.focus();
-            }
-          }, 100
-        )
-
-      }
-    }
-
-
-    return (
-      <div style={{
-        background: 'white',
-        display: 'flex',
-        gap: '30p',
-        overflowX: 'auto',
-        filter: 'drop-shadow(black 1px 1px 1px)',
-        maxWidth: '400px',
-        height: '50px'
-      }}>
-        {
-          inputValue.map((e: any, index: number) => <input key={index} onChange={(event) => handleChange(event)} name={`input-${index}`} type='text' placeholder='test' maxLength={index + 1}></input>)
-        }
-      </div>
-    )
-  }
-
-
-
   const filterColors = (inputValue: string) => {
     return colourOptions.filter((i) =>
       i.label.toLowerCase().includes(inputValue.toLowerCase())
@@ -929,59 +862,10 @@ export default function Home() {
     },);
   };
 
-  // const colourStyles: StylesConfig<ColourOption, true> = {
-  //   control: (styles) => ({ ...styles, backgroundColor: 'white' }),
-  //   option: (styles, { data, isDisabled, isFocused, isSelected }) => {
-  //     const color = chroma(data.color);
-
-  //     return {
-  //       ...styles,
-  //       backgroundColor: isDisabled
-  //         ? undefined
-  //         : isSelected
-  //           ? data.color
-  //           : isFocused
-  //             ? color.alpha(0.1).css()
-  //             : undefined,
-  //       color: isDisabled
-  //         ? '#ccc'
-  //         : isSelected
-  //           ? chroma.contrast(color, 'white') > 2
-  //             ? 'white'
-  //             : 'black'
-  //           : data.color,
-  //       cursor: isDisabled ? 'not-allowed' : 'default',
-
-  //       ':active': {
-  //         ...styles[':active'],
-  //         backgroundColor: !isDisabled
-  //           ? isSelected
-  //             ? data.color
-  //             : color.alpha(0.3).css()
-  //           : undefined,
-  //       },
-  //     };
-  //   },
-  //   multiValue: (styles, { data }) => {
-  //     const color = chroma(data.color);
-  //     return {
-  //       ...styles,
-  //       backgroundColor: color.alpha(0.1).css(),
-  //     };
-  //   },
-  //   multiValueLabel: (styles, { data }) => ({
-  //     ...styles,
-  //     color: data.color,
-  //   }),
-  //   multiValueRemove: (styles, { data }) => ({
-  //     ...styles,
-  //     color: data.color,
-  //     ':hover': {
-  //       backgroundColor: data.color,
-  //       color: 'white',
-  //     },
-  //   }),
-  // };
+  function handleInputSelect(newValue: MultiValue<ColourOption>, actionMeta: ActionMeta<ColourOption>) {
+    console.log(newValue)
+    setSearchInput2(newValue)
+  }
 
   return (
     <main>
@@ -993,9 +877,7 @@ export default function Home() {
         <div className='nav-icons'>
           <form onSubmit={(event) => handleForm(event)}>
             <AsyncSelect
-              // styles={colourStyles}
-              isMulti closeMenuOnSelect={false} cacheOptions loadOptions={loadOptions} defaultOptions />
-            {/* <SearchBar /> */}
+              isMulti closeMenuOnSelect={true} cacheOptions loadOptions={loadOptions} defaultOptions onChange={(newValue, actionMeta) => handleInputSelect(newValue, actionMeta)} />
             <input className='search-bar' type='text' placeholder={placeholderTextList[RandomNumber()!]} onChange={(event) => handleSearch(event)}></input>
           </form>
           <div className='calender'><Image src='/calender.png' alt='calender icon' width={iconSize} height={iconSize} color='black'></Image></div>
