@@ -92,7 +92,7 @@ h3 {
   background: radial-gradient(circle at 50% 50%, rgba(152,251,152,0.20),rgba(255, 255, 255, 0) 75%)
 }
 
-input[type=text] {
+.search-bar {
   width: 400px;
   align-items: center;
   background-color: white;
@@ -108,7 +108,7 @@ input[type=text] {
   margin-right: 30px;
 }
 
-input[type=text] :focus {
+.search-bar:focus {
   outline: none;
 }
 
@@ -211,7 +211,7 @@ input[type=text] :focus {
 }
 
 .food-item-expanded:hover{
-  transition-delay: .30s;
+  transition-delay: .55s;
 }
 
 .food-item:last-child {

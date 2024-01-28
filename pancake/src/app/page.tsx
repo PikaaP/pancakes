@@ -1,13 +1,12 @@
 'use client';
 
 import Image from 'next/image'
-import { useState, useEffect, useRef } from 'react';
-import axios from 'axios';
+import { useState, useEffect, useRef, ChangeEvent, FocusEvent } from 'react';
+
 import Link from 'next/link'
 import foodRepository, { FoodRepo } from '../../lib/food/repo/food.repository';
 import toast, { Toaster } from 'react-hot-toast';
-import { list } from 'postcss';
-import { KeyObjectType } from 'crypto';
+
 
 import Button from '@mui/material/Button';
 import Dialog, { DialogProps } from '@mui/material/Dialog';
@@ -15,6 +14,14 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
+
+
+
+import AsyncSelect from 'react-select/async';
+import { ColourOption, colourOptions } from '../../data';
+import { StylesConfig } from 'react-select';
+
+import chroma from "chroma-js"
 
 const iconSize = 60
 var data = [{}]
@@ -30,7 +37,53 @@ export default function Home() {
   useEffect(
     () => {
       async function getFood() {
-        const food = await foodRepository.getAll();
+        const food: any = await foodRepository.getAll();
+        
+        const healthlabelslist: any[] = []
+        const ingredientslist: any[] = []
+        const tagsList: any[] = []
+
+        for (var key in food[0]) {
+          food[0][key].map(
+            (element: any) => {
+
+              element.recipe.healthLabels.forEach(function (entry: any) {
+                healthlabelslist.push(entry)
+              })
+
+              element.recipe.ingredients.map((elements: any) => { return elements.food }).forEach(function (entry: any) {
+                ingredientslist.push(entry)
+              })
+
+              if (element.recipe.tags) {
+                element.recipe.tags.forEach(function (entry: any) {
+                  tagsList.push(entry)
+                })
+              }
+
+
+            }
+          )
+        }
+        const uniqHealthlabelslist = [...new Set(healthlabelslist)];
+        const uniqingredientslist = [...new Set(ingredientslist)];
+        const uniqtagsList = [...new Set(tagsList)];
+        const dataList: any = []
+
+        var newArray = uniqingredientslist.concat(uniqtagsList);
+        var newArray2 = newArray.concat(uniqHealthlabelslist);
+
+        newArray2.forEach((element: any, index: number) => {
+          dataList.push(
+            {
+              value: element.toLowerCase(),
+              label: element,
+              color: "#" + Math.floor(Math.random() * 16777215).toString(16)
+            }
+          )
+        })
+
+        console.log(dataList)
         setServerData(food)
       }
       getFood()
@@ -249,6 +302,71 @@ export default function Home() {
       }
     }
 
+
+    const BasketIcon2 = () => {
+
+      function handleAddBasket(): void {
+        // if (typeof window !== 'undefined') {
+        //   if (sessionStorage.getItem('basket') !== null) {
+        //     const stringValue = sessionStorage.getItem('basket')
+        //     const value = JSON.parse(stringValue!)
+        //     let basketList = [...value, [foodItem.foodItem.label, foodItem.foodItem.category, foodItem.foodItem.calories]]
+        //     sessionStorage.setItem('basket', JSON.stringify(basketList))
+        //   }
+        //   else {
+        //     sessionStorage.setItem('basket', JSON.stringify([[foodItem.foodItem.label, foodItem.foodItem.category, foodItem.foodItem.calories]]))
+        //   }
+        //   setBasketStatus(true)
+        //   toast.success(`Added ${foodItem.foodItem.label} to shopping list.`, { position: 'top-center' })
+        // }
+      }
+
+      function handleRemoveasket(): void {
+
+        // if (typeof window !== 'undefined') {
+        //   const stringValue = sessionStorage.getItem('basket')
+        //   const value = JSON.parse(stringValue!)
+        //   let index
+        //   for (var i = 0; i < value.length; i++) {
+        //     if (value[i][0] == foodItem.foodItem.label && value[i][1] == foodItem.foodItem.category) {
+        //       index = i
+        //     }
+        //   }
+        //   value.splice(index, 1)
+        //   let newBasketList = value
+        //   setBasketStatus(false)
+        //   sessionStorage.setItem('basket', JSON.stringify(newBasketList))
+        //   toast.error(`Removed ${foodItem.foodItem.label} from shopping list.`, {
+        //     position: 'top-center',
+        //   })
+        // }
+      }
+
+      if (typeof window !== 'undefined') {
+        if (sessionStorage.getItem('basket') !== null) {
+          const stringValue = sessionStorage.getItem('basket')
+          const value = JSON.parse(stringValue!)
+          let test = value.filter((element: any) => element[0] == foodItem.foodItem.name)
+          if (value.find((element: Array<string | number>) => element[0] == foodItem.foodItem.label)) {
+            return (
+              <button onClick={() => handleRemoveasket()}>Remove</button>
+            )
+          }
+          else {
+            return (
+              <button onClick={() => handleAddBasket()}>Add to shopping list!</button>
+            )
+          }
+        }
+        else {
+          return (
+            <button onClick={() => handleAddBasket()}>Add to shopping list!</button>
+          )
+        }
+
+      }
+    }
+
     const Tags = () => {
       if (foodItem.foodItem.tags) {
         return (
@@ -305,7 +423,7 @@ export default function Home() {
             aria-describedby="Description"
           >
             <DialogTitle id="scroll-dialog-title">Recipe: {foodItem.foodItem.label}</DialogTitle>
-            <DialogContent dividers={scroll === 'body'}>
+            <DialogContent dividers={scroll === 'body'} >
 
               <video controls playsInline muted loop poster='/pancake.png' style={{
                 objectFit: "cover",
@@ -313,7 +431,7 @@ export default function Home() {
                 <source width={'max'} height={'max'} src={'/billboardVideo.mp4'}></source>
               </video>
               <div>
-                <BasketIcon />
+                <BasketIcon2 />
                 <FavIcon />
               </div>
               <h1> Ingredients</h1>
@@ -341,8 +459,8 @@ export default function Home() {
                 )}
               </DialogContentText>
             </DialogContent>
-            <DialogActions>
-              <BasketIcon />
+            <DialogActions >
+              <BasketIcon2 />
               <FavIcon />
             </DialogActions>
           </Dialog>
@@ -663,17 +781,6 @@ export default function Home() {
 
   }
 
-  function handleForm(event: React.FormEvent<HTMLFormElement>): void {
-    event.preventDefault()
-  }
-
-  function handleSearch(event: React.FormEvent<HTMLInputElement>): void {
-
-    var search = (event.target as HTMLTextAreaElement).value.toLowerCase();
-    setSearchInput(search)
-  }
-
-
   const Basket = () => {
     let [showBasket, setShowBasket] = useState<boolean>(false)
 
@@ -734,13 +841,148 @@ export default function Home() {
 
   function RandomNumber() {
     const [randomNumber, setRandomNumber] = useState<number>();
-  
+
     useEffect(() => {
       setRandomNumber(Math.floor(Math.random() * placeholderTextList.length));
     }, []);
-  
+
     return randomNumber
   }
+
+  function handleForm(event: React.FormEvent<HTMLFormElement>): void {
+    event.preventDefault()
+  }
+
+  function handleSearch(event: React.FormEvent<HTMLInputElement>): void {
+
+    var search = (event.target as HTMLTextAreaElement).value.toLowerCase();
+    setSearchInput(search)
+  }
+
+  const SearchBar = () => {
+
+    const [inputValue, setInputValue] = useState<any>([''])
+
+    function handleChange(event: ChangeEvent<HTMLInputElement>): void {
+
+
+      const { maxLength, value, name } = event.target
+
+      const [fieldName, fieldIndex] = name.split("-")
+
+      let fieldIntIndex = parseInt(fieldIndex, 10)
+
+
+      if (value.length >= maxLength) {
+
+        setInputValue([...inputValue, event.target.value])
+        console.log(inputValue)
+
+        setTimeout(
+          () => {
+            const nextfield: any = document.querySelector(
+              `input[name=input-${fieldIntIndex + 1}]`
+            );
+
+            if (nextfield !== null) {
+              console.log('going next')
+              nextfield.focus();
+            }
+          }, 100
+        )
+
+      }
+    }
+
+
+    return (
+      <div style={{
+        background: 'white',
+        display: 'flex',
+        gap: '30p',
+        overflowX: 'auto',
+        filter: 'drop-shadow(black 1px 1px 1px)',
+        maxWidth: '400px',
+        height: '50px'
+      }}>
+        {
+          inputValue.map((e: any, index: number) => <input key={index} onChange={(event) => handleChange(event)} name={`input-${index}`} type='text' placeholder='test' maxLength={index + 1}></input>)
+        }
+      </div>
+    )
+  }
+
+
+
+  const filterColors = (inputValue: string) => {
+    return colourOptions.filter((i) =>
+      i.label.toLowerCase().includes(inputValue.toLowerCase())
+    );
+  };
+
+  const loadOptions = (
+    inputValue: string,
+    callback: (options: ColourOption[]) => void
+  ) => {
+    setTimeout(() => {
+      callback(filterColors(inputValue));
+    },);
+  };
+
+  // const colourStyles: StylesConfig<ColourOption, true> = {
+  //   control: (styles) => ({ ...styles, backgroundColor: 'white' }),
+  //   option: (styles, { data, isDisabled, isFocused, isSelected }) => {
+  //     const color = chroma(data.color);
+
+  //     return {
+  //       ...styles,
+  //       backgroundColor: isDisabled
+  //         ? undefined
+  //         : isSelected
+  //           ? data.color
+  //           : isFocused
+  //             ? color.alpha(0.1).css()
+  //             : undefined,
+  //       color: isDisabled
+  //         ? '#ccc'
+  //         : isSelected
+  //           ? chroma.contrast(color, 'white') > 2
+  //             ? 'white'
+  //             : 'black'
+  //           : data.color,
+  //       cursor: isDisabled ? 'not-allowed' : 'default',
+
+  //       ':active': {
+  //         ...styles[':active'],
+  //         backgroundColor: !isDisabled
+  //           ? isSelected
+  //             ? data.color
+  //             : color.alpha(0.3).css()
+  //           : undefined,
+  //       },
+  //     };
+  //   },
+  //   multiValue: (styles, { data }) => {
+  //     const color = chroma(data.color);
+  //     return {
+  //       ...styles,
+  //       backgroundColor: color.alpha(0.1).css(),
+  //     };
+  //   },
+  //   multiValueLabel: (styles, { data }) => ({
+  //     ...styles,
+  //     color: data.color,
+  //   }),
+  //   multiValueRemove: (styles, { data }) => ({
+  //     ...styles,
+  //     color: data.color,
+  //     ':hover': {
+  //       backgroundColor: data.color,
+  //       color: 'white',
+  //     },
+  //   }),
+  // };
+
   return (
     <main>
       <nav className='nav-container'>
@@ -750,7 +992,11 @@ export default function Home() {
         </div>
         <div className='nav-icons'>
           <form onSubmit={(event) => handleForm(event)}>
-            <input type='text' placeholder={placeholderTextList[RandomNumber()!]} onChange={(event) => handleSearch(event)}></input>
+            <AsyncSelect
+              // styles={colourStyles}
+              isMulti closeMenuOnSelect={false} cacheOptions loadOptions={loadOptions} defaultOptions />
+            {/* <SearchBar /> */}
+            <input className='search-bar' type='text' placeholder={placeholderTextList[RandomNumber()!]} onChange={(event) => handleSearch(event)}></input>
           </form>
           <div className='calender'><Image src='/calender.png' alt='calender icon' width={iconSize} height={iconSize} color='black'></Image></div>
           <Basket />

@@ -14,6 +14,7 @@
     "@emotion/styled": "^11.11.0",
     "@mui/material": "^5.15.5",
     "axios": "^1.6.2",
+    "chroma-js": "^2.4.2",
     "next": "^14.0.4",
     "react": "^18.2.0",
     "react-burger-menu": "^3.0.9",
@@ -21,9 +22,11 @@
     "react-hot-toast": "^2.4.1",
     "react-pro-sidebar": "^1.1.0-alpha.1",
     "react-router-dom": "^6.20.1",
+    "react-select": "^5.8.0",
     "window-size": "^1.1.1"
   },
   "devDependencies": {
+    "@types/chroma-js": "^2.4.3",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-burger-menu": "^2.8.7",
