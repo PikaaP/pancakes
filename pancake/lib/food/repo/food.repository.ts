@@ -5,6 +5,7 @@ import axiosInstance from "../../http/client/axios.client";
 type IFoodRepo = {
     getAll: () => Promise<object>;
     getByType: (type: string) => Promise<object>;
+    getByTypeId: (type: string, id: string) => Promise<object>;
 }
 
 export function FoodRepo(axios: AxiosInstance): IFoodRepo {
@@ -25,6 +26,16 @@ export function FoodRepo(axios: AxiosInstance): IFoodRepo {
             catch (err) {
                 console.log(err)
             }
+        },
+
+        getByTypeId: async (type: string, id: string) => {
+            try {
+                return (await axios.get(`${type}` + `/${id}`)).data
+            }
+            catch (err) {
+                console.log(err)
+            }
+
         }
     }
 }

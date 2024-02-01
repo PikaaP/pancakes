@@ -4,9 +4,8 @@ import Image from 'next/image'
 import { useState, useEffect, useRef, ChangeEvent, FocusEvent } from 'react';
 
 import Link from 'next/link'
-import foodRepository, { FoodRepo } from '../../lib/food/repo/food.repository';
-import toast, { Toaster } from 'react-hot-toast';
-
+import foodRepository from '../../lib/food/repo/food.repository';
+import toast from 'react-hot-toast';
 
 import Button from '@mui/material/Button';
 import Dialog, { DialogProps } from '@mui/material/Dialog';
@@ -42,6 +41,7 @@ export default function Home() {
     () => {
       async function getFood() {
         const food: any = await foodRepository.getAll();
+        console.log(food)
 
         const healthlabelslist: any[] = []
         const ingredientslist: any[] = []
@@ -50,22 +50,17 @@ export default function Home() {
         for (var key in food[0]) {
           food[0][key].map(
             (element: any) => {
-
-              element.recipe.healthLabels.forEach(function (entry: any) {
+             element.healthLabels.forEach(function (entry: any) {
                 healthlabelslist.push(entry.toLowerCase())
               })
-
-              element.recipe.ingredients.map((elements: any) => { return elements.food }).forEach(function (entry: any) {
+             element.ingredients.map((elements: any) => { return elements.food }).forEach(function (entry: any) {
                 ingredientslist.push(entry.toLowerCase())
               })
-
-              if (element.recipe.tags) {
-                element.recipe.tags.forEach(function (entry: any) {
+              if (element.tags) {
+               element.tags.forEach(function (entry: any) {
                   tagsList.push(entry.toLowerCase())
                 })
               }
-
-
             }
           )
         }
@@ -90,8 +85,6 @@ export default function Home() {
             }
           )
         })
-
-        // console.log(dataList)
         setServerData(food)
       }
       getFood()
@@ -102,12 +95,13 @@ export default function Home() {
     if (serverData) {
       return (
         serverData[0]['breakfast'].map((item: any) => {
-          const newfoodItem = { ...item['recipe'], category: "breakfast" }
+          const newfoodItem = { ...item, category: "breakfast" }
           return (
-            <FoodCard key={item['recipe'].calories} foodItem={newfoodItem} />
+            <FoodCard key={item.calories} foodItem={newfoodItem} />
           )
         })
       )
+
     }
     else {
       return (
@@ -118,12 +112,14 @@ export default function Home() {
   }
 
   const Lunch = () => {
+
     if (serverData) {
       return (
         serverData[0]['lunch'].map((item: any) => {
-          const newfoodItem = { ...item['recipe'], category: "lunch" }
+
+          const newfoodItem = { ...item, category: "lunch" }
           return (
-            <FoodCard key={item['recipe'].calories} foodItem={newfoodItem} />
+            <FoodCard key={item.calories} foodItem={newfoodItem} />
           )
         })
       )
@@ -140,9 +136,9 @@ export default function Home() {
     if (serverData) {
       return (
         serverData[0]['dinner'].map((item: any) => {
-          const newfoodItem = { ...item['recipe'], category: "dinner" }
+          const newfoodItem = { ...item, category: "dinner" }
           return (
-            <FoodCard key={item['recipe'].calories} foodItem={newfoodItem} />
+            <FoodCard key={item.calories} foodItem={newfoodItem} />
           )
         })
       )
@@ -159,9 +155,9 @@ export default function Home() {
     if (serverData) {
       return (
         serverData[0]['snacks'].map((item: any) => {
-          const newfoodItem = { ...item['recipe'], category: "snacks" }
+          const newfoodItem = { ...item, category: "snacks" }
           return (
-            <FoodCard key={item['recipe'].calories} foodItem={newfoodItem} />
+            <FoodCard key={item.calories} foodItem={newfoodItem} />
           )
         })
       )
@@ -174,26 +170,26 @@ export default function Home() {
 
   }
 
-  const FoodCard = (foodItem: any) => {
+
+  const FoodCard = ({ foodItem, showName, showTags, showCalories }: any) => {
+
     let [likeStatus, setLikeStatus] = useState<boolean>(false)
     let [basketStatus, setBasketStatus] = useState<boolean>(false)
     const [hover, setHover] = useState<boolean>(false)
-    let [More, setMoreStatus] = useState<boolean>(false)
 
     const FavIcon = () => {
-
       const handleSetFav = (likeStatus: boolean) => {
         if (typeof window !== 'undefined') {
           try {
             if (sessionStorage.getItem('fav') !== null) {
               const stringValue = sessionStorage.getItem('fav')
               const value = JSON.parse(stringValue!)
-              let favList = [...value, foodItem.foodItem.label]
+              let favList = [...value, foodItem.label]
               sessionStorage.setItem('fav', JSON.stringify(favList))
             }
 
             else {
-              sessionStorage.setItem('fav', JSON.stringify([foodItem.foodItem.label]))
+              sessionStorage.setItem('fav', JSON.stringify([foodItem.label]))
             }
             setLikeStatus(!likeStatus)
           } catch (error) {
@@ -206,7 +202,7 @@ export default function Home() {
         if (typeof window !== 'undefined') {
           const stringValue = sessionStorage.getItem('fav')
           const value = JSON.parse(stringValue!)
-          const index = value.indexOf(foodItem.foodItem.label)
+          const index = value.indexOf(foodItem.label)
           if (index > -1) {
             value.splice(index, 1)
             let newFavList = value
@@ -220,7 +216,7 @@ export default function Home() {
         if (sessionStorage.getItem('fav') !== null) {
           const stringValue = sessionStorage.getItem('fav')
           const value = JSON.parse(stringValue!)
-          if (value.find((element: string) => element == foodItem.foodItem.label)) {
+          if (value.find((element: string) => element == foodItem.label)) {
             return (
               <Image draggable={false} className='filled-heart' src='/filledHeartIcon.png' alt='filled fav icon' width={40} height={40}
                 onClick={() => handleRemoveFav(likeStatus)}></Image>
@@ -251,14 +247,14 @@ export default function Home() {
           if (sessionStorage.getItem('basket') !== null) {
             const stringValue = sessionStorage.getItem('basket')
             const value = JSON.parse(stringValue!)
-            let basketList = [...value, [foodItem.foodItem.label, foodItem.foodItem.category, foodItem.foodItem.calories]]
+            let basketList = [...value, [foodItem.label, foodItem.category, foodItem.calories]]
             sessionStorage.setItem('basket', JSON.stringify(basketList))
           }
           else {
-            sessionStorage.setItem('basket', JSON.stringify([[foodItem.foodItem.label, foodItem.foodItem.category, foodItem.foodItem.calories]]))
+            sessionStorage.setItem('basket', JSON.stringify([[foodItem.label, foodItem.category, foodItem.calories]]))
           }
           setBasketStatus(true)
-          toast.success(`Added ${foodItem.foodItem.label} to shopping list.`, { position: 'top-center' })
+          toast.success(`Added ${foodItem.label} to shopping list.`, { position: 'top-center' })
         }
       }
 
@@ -269,7 +265,7 @@ export default function Home() {
           const value = JSON.parse(stringValue!)
           let index
           for (var i = 0; i < value.length; i++) {
-            if (value[i][0] == foodItem.foodItem.label && value[i][1] == foodItem.foodItem.category) {
+            if (value[i][0] == foodItem.label && value[i][1] == foodItem.category) {
               index = i
             }
           }
@@ -277,7 +273,7 @@ export default function Home() {
           let newBasketList = value
           setBasketStatus(false)
           sessionStorage.setItem('basket', JSON.stringify(newBasketList))
-          toast.error(`Removed ${foodItem.foodItem.label} from shopping list.`, {
+          toast.error(`Removed ${foodItem.label} from shopping list.`, {
             position: 'top-center',
           })
         }
@@ -287,73 +283,8 @@ export default function Home() {
         if (sessionStorage.getItem('basket') !== null) {
           const stringValue = sessionStorage.getItem('basket')
           const value = JSON.parse(stringValue!)
-          let test = value.filter((element: any) => element[0] == foodItem.foodItem.name)
-          if (value.find((element: Array<string | number>) => element[0] == foodItem.foodItem.label)) {
-            return (
-              <button onClick={() => handleRemoveasket()}>Remove</button>
-            )
-          }
-          else {
-            return (
-              <button onClick={() => handleAddBasket()}>Add to shopping list!</button>
-            )
-          }
-        }
-        else {
-          return (
-            <button onClick={() => handleAddBasket()}>Add to shopping list!</button>
-          )
-        }
-
-      }
-    }
-
-
-    const BasketIcon2 = () => {
-
-      function handleAddBasket(): void {
-        // if (typeof window !== 'undefined') {
-        //   if (sessionStorage.getItem('basket') !== null) {
-        //     const stringValue = sessionStorage.getItem('basket')
-        //     const value = JSON.parse(stringValue!)
-        //     let basketList = [...value, [foodItem.foodItem.label, foodItem.foodItem.category, foodItem.foodItem.calories]]
-        //     sessionStorage.setItem('basket', JSON.stringify(basketList))
-        //   }
-        //   else {
-        //     sessionStorage.setItem('basket', JSON.stringify([[foodItem.foodItem.label, foodItem.foodItem.category, foodItem.foodItem.calories]]))
-        //   }
-        //   setBasketStatus(true)
-        //   toast.success(`Added ${foodItem.foodItem.label} to shopping list.`, { position: 'top-center' })
-        // }
-      }
-
-      function handleRemoveasket(): void {
-
-        // if (typeof window !== 'undefined') {
-        //   const stringValue = sessionStorage.getItem('basket')
-        //   const value = JSON.parse(stringValue!)
-        //   let index
-        //   for (var i = 0; i < value.length; i++) {
-        //     if (value[i][0] == foodItem.foodItem.label && value[i][1] == foodItem.foodItem.category) {
-        //       index = i
-        //     }
-        //   }
-        //   value.splice(index, 1)
-        //   let newBasketList = value
-        //   setBasketStatus(false)
-        //   sessionStorage.setItem('basket', JSON.stringify(newBasketList))
-        //   toast.error(`Removed ${foodItem.foodItem.label} from shopping list.`, {
-        //     position: 'top-center',
-        //   })
-        // }
-      }
-
-      if (typeof window !== 'undefined') {
-        if (sessionStorage.getItem('basket') !== null) {
-          const stringValue = sessionStorage.getItem('basket')
-          const value = JSON.parse(stringValue!)
-          let test = value.filter((element: any) => element[0] == foodItem.foodItem.name)
-          if (value.find((element: Array<string | number>) => element[0] == foodItem.foodItem.label)) {
+          let test = value.filter((element: any) => element[0] == foodItem.name)
+          if (value.find((element: Array<string | number>) => element[0] == foodItem.label)) {
             return (
               <button onClick={() => handleRemoveasket()}>Remove</button>
             )
@@ -374,18 +305,18 @@ export default function Home() {
     }
 
     const Tags = () => {
-      if (foodItem.foodItem.tags) {
+      if (foodItem.tags) {
         return (
-          (foodItem.foodItem.tags).slice(0, 4).map((element: any, index: number) => {
+          (foodItem.tags).slice(0, 4).map((element: any, index: number) => {
             return (
               <h3 className='food-tags-item' key={index}>{element}</h3>
             )
           })
         )
       }
-      else if (foodItem.foodItem.healthLabels) {
+      else if (foodItem.healthLabels) {
         return (
-          (foodItem.foodItem.healthLabels).slice(0, 4).map((element: any, index: number) => {
+          (foodItem.healthLabels).slice(0, 4).map((element: any, index: number) => {
             return (
               <h3 className='food-tags-item' key={index}>{element}</h3>
             )
@@ -394,6 +325,69 @@ export default function Home() {
       }
 
     }
+
+    const BasketIcon2 = () => {
+      function handleAddBasket(): void {
+        if (typeof window !== 'undefined') {
+          if (sessionStorage.getItem('basket') !== null) {
+            const stringValue = sessionStorage.getItem('basket')
+            const value = JSON.parse(stringValue!)
+            let basketList = [...value, [foodItem.label, foodItem.category, foodItem.calories]]
+            sessionStorage.setItem('basket', JSON.stringify(basketList))
+          }
+          else {
+            sessionStorage.setItem('basket', JSON.stringify([[foodItem.label, foodItem.category, foodItem.calories]]))
+          }
+          setBasketStatus(true)
+          toast.success(`Added ${foodItem.label} to shopping list.`, { position: 'top-center' })
+        }
+      }
+
+      function handleRemoveasket(): void {
+
+        if (typeof window !== 'undefined') {
+          const stringValue = sessionStorage.getItem('basket')
+          const value = JSON.parse(stringValue!)
+          let index
+          for (var i = 0; i < value.length; i++) {
+            if (value[i][0] == foodItem.label && value[i][1] == foodItem.category) {
+              index = i
+            }
+          }
+          value.splice(index, 1)
+          let newBasketList = value
+          setBasketStatus(false)
+          sessionStorage.setItem('basket', JSON.stringify(newBasketList))
+          toast.error(`Removed ${foodItem.label} from shopping list.`, {
+            position: 'top-center',
+          })
+        }
+      }
+
+      if (typeof window !== 'undefined') {
+        if (sessionStorage.getItem('basket') !== null) {
+          const stringValue = sessionStorage.getItem('basket')
+          const value = JSON.parse(stringValue!)
+          if (value.find((element: Array<string | number>) => element[0] == foodItem.label)) {
+            return (
+              <button onClick={() => handleRemoveasket()}>Remove</button>
+            )
+          }
+          else {
+            return (
+              <button onClick={() => handleAddBasket()}>Add to shopping list!</button>
+            )
+          }
+        }
+        else {
+          return (
+            <button onClick={() => handleAddBasket()}>Add to shopping list!</button>
+          )
+        }
+
+      }
+    }
+
 
     const MoreIcon = () => {
       const [open, setOpen] = useState(false);
@@ -404,8 +398,9 @@ export default function Home() {
         setScroll(scrollType);
       };
 
-      const handleClose = () => {
+      const handleClose: DialogProps["onClose"] = (event, reason) => {
         setOpen(false);
+        setHover(false)
       };
 
       const descriptionElementRef = useRef<HTMLElement>(null);
@@ -428,7 +423,7 @@ export default function Home() {
             aria-labelledby="Title"
             aria-describedby="Description"
           >
-            <DialogTitle id="scroll-dialog-title">Recipe: {foodItem.foodItem.label}</DialogTitle>
+            <DialogTitle id="scroll-dialog-title">Recipe: {foodItem.label}</DialogTitle>
             <DialogContent dividers={scroll === 'body'} >
 
               <video controls playsInline muted loop poster='/pancake.png' style={{
@@ -446,7 +441,7 @@ export default function Home() {
                 ref={descriptionElementRef}
                 tabIndex={-1}
               >
-                {foodItem.foodItem.ingredientLines.map(
+                {foodItem.ingredientLines.map(
                   (element: any) => {
                     return <li>{element}</li>
                   }
@@ -458,7 +453,7 @@ export default function Home() {
                 ref={descriptionElementRef}
                 tabIndex={-1}
               >
-                {foodItem.foodItem.instructionLines.map(
+                {foodItem.instructionLines.map(
                   (element: any) => {
                     return <li>{element}</li>
                   }
@@ -470,10 +465,11 @@ export default function Home() {
               <FavIcon />
             </DialogActions>
           </Dialog>
-
         </div>
       )
     }
+
+
 
     function playThumbnail(): void {
       setHover(true)
@@ -495,15 +491,24 @@ export default function Home() {
               borderRadius: "10px",
             }}></Image>
           </div>
-          <div className='food-name'>
-            <h3> {foodItem.foodItem.label}</h3>
-          </div>
-          <div className='food-details'>
-            <h3>Calories: {Math.round(foodItem.foodItem.calories)}</h3>
-          </div>
-          <div className='food-tags-container'>
-            <Tags />
-          </div>
+          {
+            showName ?
+              <div className='food-name'>
+                <h3> {foodItem.label}</h3>
+              </div> : <></>
+          }
+          {
+            showCalories ?
+              <div className='food-details'>
+                <h3>Calories: {Math.round(foodItem.calories)}</h3>
+              </div> : <></>
+          }
+          {
+            showTags ?
+              <div className='food-tags-container'>
+                <Tags />
+              </div> : <></>
+          }
         </div>
       )
     }
@@ -529,10 +534,10 @@ export default function Home() {
             <MoreIcon />
           </div>
           <div className='food-name'>
-            <h3> {foodItem.foodItem.label}</h3>
+            <h3> {foodItem.label}</h3>
           </div>
           <div className='food-details'>
-            <h3>Calories: {Math.round(foodItem.foodItem.calories)}</h3>
+            <h3>Calories: {Math.round(foodItem.calories)}</h3>
           </div>
           <div className='food-tags-container'>
             <Tags />
@@ -541,6 +546,12 @@ export default function Home() {
       )
     }
   }
+
+  FoodCard.defaultProps = {
+    showTags: true,
+    showCalories: true,
+    showName: true
+  };
 
   const FoodCardPreview = () => {
 
@@ -643,18 +654,19 @@ export default function Home() {
   const ViewPortContent = () => {
 
     const SearchContent = () => {
-      const matches: Record<string, any> = {}
+      const matches: any = []
 
       const SearchResults = (category: any) => {
 
         const [foodData, setFoodData] = useState<any>()
         const searchResult: Object[] = []
 
-
         useEffect(() => {
           async function getFood() {
             const food = await foodRepository.getByType(category.category)
+            console.log(food)
             setFoodData(food)
+            console.log('happending now')
           }
           getFood()
         }, [])
@@ -667,18 +679,19 @@ export default function Home() {
 
         else {
           foodData.forEach((element: any) => {
-            const item = element['recipe']
+            const item = element
 
             let matchCount: any = {
               tagList: [],
               ingredientList: [],
               type: String,
             }
+
             let result = false
 
             if (item.tags) {
               for (var i = 0; i < searchInput2.length; i++) {
-                if (item.tags.some((r: string) => r.toLowerCase().includes(searchInput2[i].label.toLowerCase()))) {
+                if (item.tags.some((r: string) => r.toLowerCase() == searchInput2[i].label.toLowerCase())) {
                   matchCount.tagList.push(searchInput2[i])
                   matchCount.type = category.category
                   result = true
@@ -686,10 +699,11 @@ export default function Home() {
               }
             }
 
+
             if (item.healthLabels) {
               for (var i = 0; i < searchInput2.length; i++) {
-                if (item.healthLabels.some((r: string) => r.toLowerCase().includes(searchInput2[i].label.toLowerCase()))) {
-                  matchCount.tagList.push(searchInput2[i])
+                if (item.healthLabels.some((r: string) => r.toLowerCase() == searchInput2[i].label.toLowerCase())) {
+                  matchCount.healthLabels.push(searchInput2[i])
                   matchCount.type = category.category
                   result = true
                 }
@@ -697,16 +711,15 @@ export default function Home() {
             }
 
             let ingredientList = item.ingredients.map((element: any) => element.food)
+            let ingredientListSingle = ingredientList.map((item: any) => pluralize.singular(item))
+
             for (var i = 0; i < searchInput2.length; i++) {
-              if (ingredientList.some((r: string) => r.toLowerCase().includes(searchInput2[i].label.toLowerCase()))) {
+              if (ingredientListSingle.some((r: string) => r.toLowerCase() == searchInput2[i].label.toLowerCase())) {
                 matchCount.ingredientList.push(searchInput2[i])
                 matchCount.type = category.category
                 result = true
-                // console.log(item.label, searchInput2[i].label, ingredientList)
               }
             }
-
-
             if (result) {
               searchResult.push(item)
               matches[item.label] = matchCount
@@ -715,15 +728,14 @@ export default function Home() {
           )
           return (
             <>
-              <div className='section'>
+              <div className='results-section'>
                 <h1 className='section-header'>
-
                   {category.category} {searchResult.length}
-                </h1>Ï
-                <div className='food-container'>
+                </h1>
+                <div className='results-food-container'>
                   {searchResult.map((element: any) => {
                     return (
-                      <p>{element.label}</p>
+                      < FoodCard foodItem={element} showCalories={false} showTags={false} />
                     )
                   })}
                 </div>
@@ -733,31 +745,31 @@ export default function Home() {
         }
       }
 
+      const TopResults = () => {
+
+        return (
+          <></>
+        )
+      }
+
       return (
         <>
-          <div className='search-section'>
-            <h3 className='section-header'>Found X results for X</h3>
-            <div className='search-container'>
-              <div className='main-content'>
-                <div className='section'>
-                  <div className='food-container'>
-                    <h3>Top Results</h3>
-                  </div>
-                </div>
-                <SearchResults category='Breakfast' />
-                <SearchResults category='Lunch' />
-                <SearchResults category='Dinner' />
-                <SearchResults category='Snacks' />
-              </div>
-            </div>
+
+          <div className='search-container'>
+            <TopResults />
+            <SearchResults category='Breakfast' />
+            <SearchResults category='Lunch' />
+            <SearchResults category='Dinner' />
+            <SearchResults category='Snacks' />
           </div>
+
         </>
       )
     }
 
     if (searchInput2.length !== 0) {
       return (
-        <><SearchContent/></>
+        <><SearchContent /></>
       )
     }
 
@@ -822,8 +834,8 @@ export default function Home() {
   }
 
   const placeholderTextList = [
-    'Search for pancakes, tofu, steak flour...',
-    'Search for miso Soup, fried, noodles, pork...',
+    'Search for tofu, steak flour...',
+    'Search for miso Soup, fried, noodle, pork...',
     'Search for rice, pizza, soba...',
   ]
 
@@ -863,7 +875,6 @@ export default function Home() {
   };
 
   function handleInputSelect(newValue: MultiValue<ColourOption>, actionMeta: ActionMeta<ColourOption>) {
-    console.log(newValue)
     setSearchInput2(newValue)
   }
 
@@ -877,8 +888,7 @@ export default function Home() {
         <div className='nav-icons'>
           <form onSubmit={(event) => handleForm(event)}>
             <AsyncSelect
-              isMulti closeMenuOnSelect={true} cacheOptions loadOptions={loadOptions} defaultOptions onChange={(newValue, actionMeta) => handleInputSelect(newValue, actionMeta)} />
-            <input className='search-bar' type='text' placeholder={placeholderTextList[RandomNumber()!]} onChange={(event) => handleSearch(event)}></input>
+              className='search-bar' isMulti closeMenuOnSelect={true} cacheOptions placeholder={placeholderTextList[RandomNumber()!]} loadOptions={loadOptions} defaultOptions onChange={(newValue, actionMeta) => handleInputSelect(newValue, actionMeta)} />
           </form>
           <div className='calender'><Image src='/calender.png' alt='calender icon' width={iconSize} height={iconSize} color='black'></Image></div>
           <Basket />

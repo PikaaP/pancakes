@@ -96,16 +96,8 @@ h3 {
   width: 400px;
   align-items: center;
   background-color: white;
-  background-image: url('/searchIcon.png');
-  background-position: 0 7.5px;
-  background-size: 40px 40px;
-  background-repeat: no-repeat;
   filter: drop-shadow(black 1px 1px 1px);
-  padding-top: 15px;
-  padding-right: 10px;
-  padding-bottom: 15px;
-  padding-left: 40px;
-  margin-right: 30px;
+  border-radius: 21px;
 }
 
 .search-bar:focus {
@@ -163,9 +155,11 @@ h3 {
 
 .search-section{
   margin-top: 10%;
-  width: 100
 }
 
+.results-section{
+  
+}
 .section-header {
   margin-bottom: 5px;
   margin-top: 15px;
@@ -181,6 +175,11 @@ h3 {
   height: auto;
 }
 
+.results-food-container{
+  display:flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
 
 .food-container::-webkit-scrollbar{
   display: none;
@@ -200,6 +199,7 @@ h3 {
   animation: fadeInAnimation ease .75s;
   transition-duration: .5s;
 }
+
 
 .food-item-expanded{
   flex-shrink: 0;
@@ -280,8 +280,8 @@ h3 {
 
 .search-container {
   justify-content: flex-start;
-  margin-top: 50px;
-  display:flex;
+  margin-top: 10%;
+  /* display:flex; */
   gap: 10px;
   flex-wrap: wrap;
   filter: drop-shadow(black 1px 1px 1px);
