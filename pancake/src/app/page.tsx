@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image'
-import { useState, useEffect, useRef, ChangeEvent, FocusEvent } from 'react';
+import { useState, useEffect, useRef, ChangeEvent, FocusEvent, JSX } from 'react';
 
 import Link from 'next/link'
 import foodRepository from '../../lib/food/repo/food.repository';
@@ -41,7 +41,6 @@ export default function Home() {
     () => {
       async function getFood() {
         const food: any = await foodRepository.getAll();
-        console.log(food)
 
         const healthlabelslist: any[] = []
         const ingredientslist: any[] = []
@@ -50,14 +49,14 @@ export default function Home() {
         for (var key in food[0]) {
           food[0][key].map(
             (element: any) => {
-             element.healthLabels.forEach(function (entry: any) {
+              element.healthLabels.forEach(function (entry: any) {
                 healthlabelslist.push(entry.toLowerCase())
               })
-             element.ingredients.map((elements: any) => { return elements.food }).forEach(function (entry: any) {
+              element.ingredients.map((elements: any) => { return elements.food }).forEach(function (entry: any) {
                 ingredientslist.push(entry.toLowerCase())
               })
               if (element.tags) {
-               element.tags.forEach(function (entry: any) {
+                element.tags.forEach(function (entry: any) {
                   tagsList.push(entry.toLowerCase())
                 })
               }
@@ -520,28 +519,29 @@ export default function Home() {
             display: 'flex',
             justifyContent: 'space-between'
           }}>
-            <video controls playsInline muted loop poster='/pancake.png' style={{
+            <video controls playsInline muted loop poster='/noodle.png'  style={{
               objectFit: "cover",
               borderRadius: "10px",
-
             }}>
               <source width={380} height={70} src={'/billboardVideo.mp4'}></source>
             </video>
           </div>
+
           <div>
             <FavIcon />
             <BasketIcon />
             <MoreIcon />
           </div>
+
           <div className='food-name'>
             <h3> {foodItem.label}</h3>
           </div>
-          <div className='food-details'>
+          {/* <div className='food-details'>
             <h3>Calories: {Math.round(foodItem.calories)}</h3>
-          </div>
-          <div className='food-tags-container'>
+          </div> */}
+          {/* <div className='food-tags-container'>
             <Tags />
-          </div>
+          </div> */}
         </div>
       )
     }
@@ -584,6 +584,160 @@ export default function Home() {
 
   }
 
+  const FoodItemRow = (props: any) => {
+
+    let category = props.category
+    let tickRate = props.tickRate
+
+    let [start, setStart] = useState(0)
+    let [end, setEnd] = useState<any>(tickRate)
+    let [hover, setHover] = useState(false)
+
+    let display: JSX.Element[] = []
+
+    const Item = (newfoodItem: any) => {
+
+      return (
+        <div className='food-item-test'>
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+          }}>
+            <Image src='/pancake.png' alt='' draggable={false} width={220} height={70} style={{
+              objectFit: "cover",
+              borderRadius: "10px",
+            }}></Image>
+          </div>
+          <div className='food-name'>
+            <h3> {newfoodItem.foodItem.label}</h3>
+          </div>
+        </div>
+      )
+    }
+
+    if (serverData) {
+      serverData[0][category].map((item: any) => {
+        const newfoodItem = { ...item, category: category }
+        display.push(<FoodCard foodItem={newfoodItem} />)
+      })
+    }
+
+    function handleClickBack(): void {
+      let newStart = start -= tickRate
+      let newEnd = end -= tickRate
+
+      if (newStart <= (-display.length - tickRate)) {
+        setStart(-tickRate)
+        setEnd(0)
+      }
+      else {
+        if (newEnd == 0) {
+          setStart(newStart)
+          setEnd(0)
+        }
+        else {
+          setStart(newStart)
+          setEnd(newEnd)
+        }
+      }
+    }
+
+    function handleClickForward(): void {
+
+      let newStart = start += tickRate
+      let newEnd = end += tickRate
+
+      if (newEnd >= display.length + tickRate) {
+        if (newEnd == display.length) {
+          setStart(newStart)
+          setEnd(newEnd)
+        }
+        else {
+          setStart(0)
+          setEnd(tickRate)
+        }
+
+      }
+      else {
+        setStart(newStart)
+        setEnd(newEnd)
+      }
+
+    }
+
+
+    function handleHover(): void {
+      setHover(true)
+    }
+    function handleHoverExit(): void {
+      setHover(false)
+    }
+    return (
+      <div 
+      onMouseEnter={()=>handleHover()}
+      onMouseLeave={()=>handleHoverExit()}
+      style={{
+        display: 'flex',
+        gap: '30px'
+      }}>
+        <div style={{
+          width: '50px',
+          overflowX: 'auto',
+
+        }}>
+          {hover ?  <button style={{
+          position: 'absolute',
+          top: '25%',
+          right: '100%',
+          transform: 'translate(-50%, -50%)',
+          zIndex: '100',
+          fontSize: '40px',
+          backdropFilter: 'blur(10px)',
+        }}
+
+          onClick={() => handleClickBack()}> &#8249; </button> 
+        : <></>}
+        <div style={{
+          transform: 'translate(-170px,0)'
+        }}> {display.at(start-1)}</div>
+        </div>
+        {
+          (end == 0 && start == -tickRate)
+            ?
+            display.slice(start).map((element: any) => {
+              return (
+                element
+              )
+            })
+            :
+            display.slice(start, end).map((element: any) => {
+              return (
+                element
+              )
+            })
+        }
+        <div style={{
+          width: '50px',
+          overflowX: 'auto',
+        }}>
+          {hover ? <button style={{
+          position: 'absolute',
+          top: '25%',
+          left: '100%',
+          transform: 'translate(-50%, -50%)',
+          zIndex: '100',
+          fontSize: '40px',
+          backdropFilter: 'blur(10px)',
+        }}
+          onClick={() => handleClickForward()}> &#8250; </button>
+        : <></>}
+          {display[end]}
+        </div>
+      </div>
+    )
+  }
+
+
   const MainContent = () => {
     return (
       <>
@@ -614,6 +768,16 @@ export default function Home() {
           </div>
         </div>
         <div className='main-content'>
+
+          <div className='section-test'>
+            <h1 className='section-header'>
+              Test
+            </h1>
+            <div className='food-container-test'>
+              <FoodItemRow category={'breakfast'} tickRate={5} />
+            </div>
+          </div>
+
           <div className='section'>
             <h1 className='section-header'>
               Breakfast
@@ -654,6 +818,23 @@ export default function Home() {
   const ViewPortContent = () => {
 
     const SearchContent = () => {
+
+      function checker(searchArray: any[], ingArray: string[], tagsArray: any, healthArray: any) {
+        const res = []
+        for (const item1 in searchArray) {
+          if (ingArray.includes(searchArray[item1].value) || tagsArray !== undefined && tagsArray.includes(searchArray[item1].value) || healthArray.includes(searchArray[item1].value)) {
+            res.push(true)
+          }
+        }
+        if (res.length == searchArray.length) {
+          return true
+        }
+        else {
+          return false
+        }
+
+      }
+
       const matches: any = []
 
       const SearchResults = (category: any) => {
@@ -664,9 +845,7 @@ export default function Home() {
         useEffect(() => {
           async function getFood() {
             const food = await foodRepository.getByType(category.category)
-            console.log(food)
             setFoodData(food)
-            console.log('happending now')
           }
           getFood()
         }, [])
@@ -684,79 +863,58 @@ export default function Home() {
             let matchCount: any = {
               tagList: [],
               ingredientList: [],
+              healthLabels: [],
               type: String,
             }
 
             let result = false
 
-            if (item.tags) {
-              for (var i = 0; i < searchInput2.length; i++) {
-                if (item.tags.some((r: string) => r.toLowerCase() == searchInput2[i].label.toLowerCase())) {
-                  matchCount.tagList.push(searchInput2[i])
-                  matchCount.type = category.category
-                  result = true
-                }
-              }
-            }
-
-
-            if (item.healthLabels) {
-              for (var i = 0; i < searchInput2.length; i++) {
-                if (item.healthLabels.some((r: string) => r.toLowerCase() == searchInput2[i].label.toLowerCase())) {
-                  matchCount.healthLabels.push(searchInput2[i])
-                  matchCount.type = category.category
-                  result = true
-                }
-              }
-            }
-
             let ingredientList = item.ingredients.map((element: any) => element.food)
             let ingredientListSingle = ingredientList.map((item: any) => pluralize.singular(item))
 
-            for (var i = 0; i < searchInput2.length; i++) {
-              if (ingredientListSingle.some((r: string) => r.toLowerCase() == searchInput2[i].label.toLowerCase())) {
-                matchCount.ingredientList.push(searchInput2[i])
-                matchCount.type = category.category
-                result = true
-              }
+            const check = checker(searchInput2, ingredientListSingle, item.tags, item.healthLabels)
+            if (check == true) {
+              matchCount.ingredientList.push(searchInput2)
+              matchCount.type = category.category
+              result = true
             }
+
             if (result) {
               searchResult.push(item)
               matches[item.label] = matchCount
             }
           }
           )
-          return (
-            <>
-              <div className='results-section'>
-                <h1 className='section-header'>
-                  {category.category} {searchResult.length}
-                </h1>
-                <div className='results-food-container'>
-                  {searchResult.map((element: any) => {
-                    return (
-                      < FoodCard foodItem={element} showCalories={false} showTags={false} />
-                    )
-                  })}
+
+          if (searchResult.length !== 0) {
+            return (
+              <>
+                <div className='results-section'>
+                  <h1 className='section-header'>
+                    {category.category} {searchResult.length}
+                  </h1>
+                  <div className='results-food-container'>
+                    {searchResult.map((element: any) => {
+                      return (
+                        < FoodCard foodItem={element} showCalories={false} showTags={false} />
+                      )
+                    })}
+                  </div>
                 </div>
-              </div>
-            </>
-          )
+              </>
+            )
+          }
+          else {
+            return (
+              <></>
+            )
+          }
         }
-      }
-
-      const TopResults = () => {
-
-        return (
-          <></>
-        )
       }
 
       return (
         <>
-
           <div className='search-container'>
-            <TopResults />
             <SearchResults category='Breakfast' />
             <SearchResults category='Lunch' />
             <SearchResults category='Dinner' />
